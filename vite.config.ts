@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   // NEUE EIGENSCHAFT HINZUFÜGEN:
-  base: '/equity-scenario-simulator/', 
+  base: '/equity-scenario-simulato/', 
   
   plugins: [
     react()    
