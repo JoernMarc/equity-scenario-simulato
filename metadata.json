@@ -1,0 +1,6 @@
+{
+  "name": "Equity Scenario Simulator",
+  "description": "A client-side web application for creating capitalization tables, simulating liquidation events, and planning equity scenarios.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
