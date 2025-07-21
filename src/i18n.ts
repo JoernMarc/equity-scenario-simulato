@@ -1,3 +1,4 @@
+
 export const translations = {
   en: {
     appTitle: "Equity Scenario Simulator",
@@ -847,7 +848,7 @@ Alle von Ihnen eingegebenen Daten werden ausschließlich im lokalen Speicher (\`
 Sie haben die vollständige Kontrolle über die Löschung Ihrer Daten durch Funktionen innerhalb der App oder durch das Löschen der Websitedaten Ihres Browsers.
 
 **5. Dienste von Drittanbietern**
-Diese Anwendung verwendet öffentliche Content Delivery Networks (CDNs), um notwendige Bibliotheken wie Tailwind CSS und XLSX.js zu laden. Dies kann dazu führen, dass Ihr Browser diese Drittanbieter-Server kontaktiert, um diese Dateien herunterzuladen.
+Diese Anwendung verwendet öffentliche Content Delivery Networks (CDNs), um notwendige Bibliotheken wie XLSX.js zu laden. Dies kann dazu führen, dass Ihr Browser diese Drittanbieter-Server kontaktiert, um diese Dateien herunterzuladen.
 `,
       disclaimerTitle: "Disclaimer & Lizenz",
       disclaimerText: `**Haftungs- und Gewährleistungsausschluss**
@@ -865,9 +866,7 @@ Copyright (c) 2025 Jörn Densing, Wachtberg (Deutschland)
 
 Alle Rechte vorbehalten.
 
-Die Erlaubnis zur Nutzung, zum Kopieren, Ändern und Verbreiten dieser Software und
-ihrer Dokumentation für jeden Zweck und ohne Gebühr wird hiermit ohne eine
-schriftliche Vereinbarung mit Jörn Densing, Wachtberg (Deutschland) untersagt.
+Die Erlaubnis, diese Software und ihre Dokumentation für beliebige Zwecke und ohne Gebühr zu nutzen, zu kopieren, zu modifizieren und zu verbreiten, wird hiermit ohne eine schriftliche Vereinbarung mit Jörn Densing, Wachtberg (Deutschland), untersagt.
 `,
     },
   },

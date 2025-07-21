@@ -13,7 +13,7 @@ function HelpTooltip({ text }: { text: string }) {
     
   return (
     <div className="group relative inline-flex items-center justify-center ml-1.5">
-      <button type="button" className="text-theme-subtle hover:text-theme-interactive focus:text-theme-interactive focus:outline-none cursor-help">
+      <button type="button" className="text-subtle hover:text-interactive focus:text-interactive focus:outline-none cursor-help">
         <HelpIcon />
       </button>
       <div className="absolute top-full mt-2 w-64 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 pointer-events-none z-10 transform -translate-x-1/2 left-1/2">

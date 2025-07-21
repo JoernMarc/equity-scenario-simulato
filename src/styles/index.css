@@ -114,51 +114,6 @@ input::placeholder, textarea::placeholder {
 }
 
 /* ==========================================================================
-   Benutzerdefinierte Utility-Klassen für das Theme-System
-   ========================================================================== */
-.bg-theme-surface { background-color: rgb(var(--color-bg-surface)); }
-/* ... (alle Ihre .bg-theme-..., .text-theme-... etc. Klassen) ... */
-.bg-theme-background { background-color: rgb(var(--color-bg-background)); }
-.hover\:bg-theme-background:hover { background-color: rgb(var(--color-bg-background)); }
-.bg-theme-subtle { background-color: rgb(var(--color-bg-subtle)); }
-.hover\:bg-theme-subtle:hover { background-color: rgb(var(--color-bg-subtle)); }
-.text-theme-primary { color: rgb(var(--color-text-primary)); }
-.text-theme-secondary { color: rgb(var(--color-text-secondary)); }
-.text-theme-subtle { color: rgb(var(--color-text-subtle)); }
-.text-theme-on-interactive { color: rgb(var(--color-text-on-interactive)); }
-.bg-theme-interactive { background-color: rgb(var(--color-interactive)); }
-.hover\:bg-theme-interactive-hover:hover { background-color: rgb(var(--color-interactive-hover)); }
-.text-theme-interactive { color: rgb(var(--color-interactive)); }
-.hover\:text-theme-interactive-hover:hover { color: rgb(var(--color-interactive-hover)); }
-.border-theme-interactive { border-color: rgb(var(--color-interactive)); }
-.ring-theme-interactive { --tw-ring-color: rgb(var(--color-interactive)); }
-.focus\:ring-theme-interactive:focus { --tw-ring-color: rgb(var(--color-interactive)); }
-.focus\:border-theme-interactive:focus { border-color: rgb(var(--color-interactive)); }
-.accent-theme-interactive { accent-color: rgb(var(--color-interactive)); }
-.bg-theme-disabled { background-color: rgb(var(--color-disabled)); }
-.bg-theme-danger { background-color: rgb(var(--color-danger)); }
-.hover\:bg-theme-danger-hover:hover { background-color: rgb(var(--color-danger-hover)); }
-.text-theme-danger { color: rgb(var(--color-danger)); }
-.hover\:text-theme-danger-hover:hover { color: rgb(var(--color-danger-hover)); }
-.ring-theme-danger { --tw-ring-color: rgb(var(--color-danger)); }
-.focus\:ring-theme-danger:focus { --tw-ring-color: rgb(var(--color-danger)); }
-.bg-theme-success { background-color: rgb(var(--color-success)); }
-.hover\:bg-theme-success-hover:hover { background-color: rgb(var(--color-success-hover)); }
-.text-theme-success { color: rgb(var(--color-success)); }
-.border-theme-subtle { border-color: rgb(var(--color-border-subtle)); }
-.border-theme-strong { border-color: rgb(var(--color-border-strong)); }
-.ring-theme-subtle { --tw-ring-color: rgb(var(--color-border-subtle)); }
-.focus\:ring-theme-subtle:focus { --tw-ring-color: rgb(var(--color-border-subtle)); }
-.bg-theme-success-subtle-bg { background-color: rgb(var(--color-success-subtle-bg)); }
-.text-theme-success-subtle-text { color: rgb(var(--color-success-subtle-text)); }
-.bg-theme-danger-subtle-bg { background-color: rgb(var(--color-danger-subtle-bg)); }
-.text-theme-danger-subtle-text { color: rgb(var(--color-danger-subtle-text)); }
-.bg-theme-warning-subtle { background-color: rgb(var(--color-warning-subtle-bg)); }
-.text-theme-warning-subtle { color: rgb(var(--color-warning-subtle-text)); }
-.bg-theme-info-subtle-bg { background-color: rgb(var(--color-info-subtle-bg)); }
-.text-theme-info-subtle-text { color: rgb(var(--color-info-subtle-text)); }
-
-/* ==========================================================================
    Druck-spezifische Stile
    ========================================================================== */
 @media print {

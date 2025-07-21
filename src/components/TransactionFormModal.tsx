@@ -1,7 +1,7 @@
 
 
 import React, { useMemo } from 'react';
-import { TransactionType, Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, Stakeholder, Language, ShareClass, DebtInstrumentTransaction, UpdateShareClassTransaction, CapTable, EqualizationPurchaseTransaction } from '../types';
+import { TransactionType, Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, Stakeholder, ShareClass, DebtInstrumentTransaction, UpdateShareClassTransaction, CapTable, EqualizationPurchaseTransaction } from '../types';
 import CompanyForm from './forms/CompanyForm';
 import ConvertibleLoanForm from './forms/ConvertibleLoanForm';
 import FinancingRoundForm from './forms/FinancingRoundForm';
@@ -10,17 +10,15 @@ import DebtForm from './forms/DebtForm';
 import UpdateShareClassForm from './forms/UpdateShareClassForm';
 import EqualizationForm from './forms/EqualizationForm';
 import CloseIcon from '../styles/icons/CloseIcon';
-import { Translations } from '../i18n';
 import { calculateCapTable, getShareClassesAsOf } from '../logic/calculations';
+import { useLocalization } from '../contexts/LocalizationContext';
 
 interface TransactionFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   formType: TransactionType | null;
   onSubmit: (transaction: Transaction) => void;
-  translations: Translations;
   transactionToEdit?: Transaction | null;
-  language: Language;
   transactions: Transaction[];
   stakeholders: Stakeholder[];
   capTable: CapTable | null;
@@ -32,14 +30,14 @@ function TransactionFormModal({
     onClose, 
     formType, 
     onSubmit, 
-    translations, 
     transactionToEdit,
-    language,
     transactions,
     stakeholders,
     capTable,
     projectCurrency
 }: TransactionFormModalProps) {
+  const { t } = useLocalization();
+
   if (!isOpen || !formType) return null;
 
   const allShareClasses = useMemo<ShareClass[]>(() => {
@@ -58,20 +56,16 @@ function TransactionFormModal({
         return <CompanyForm 
                   onSubmit={onSubmit} 
                   onCancel={onClose} 
-                  translations={translations} 
                   transactionToEdit={transactionToEdit as FoundingTransaction} 
                   stakeholders={stakeholders}
-                  language={language}
                 />;
       case TransactionType.CONVERTIBLE_LOAN:
         return <ConvertibleLoanForm 
                   onSubmit={onSubmit} 
                   onCancel={onClose} 
-                  translations={translations} 
                   transactionToEdit={transactionToEdit as ConvertibleLoanTransaction} 
                   stakeholders={stakeholders}
                   projectCurrency={projectCurrency}
-                  language={language}
                 />;
       case TransactionType.FINANCING_ROUND: {
         const activeTxs = transactions.filter(tx => tx.status === 'ACTIVE');
@@ -95,35 +89,29 @@ function TransactionFormModal({
         return <FinancingRoundForm 
                     onSubmit={onSubmit} 
                     onCancel={onClose} 
-                    translations={translations} 
                     transactionToEdit={transactionToEdit as FinancingRoundTransaction}
                     preRoundTotalShares={preRoundTotalShares}
                     convertibleLoans={convertibleLoans}
                     stakeholders={stakeholders}
                     projectCurrency={projectCurrency}
-                    language={language}
                 />;
       }
       case TransactionType.SHARE_TRANSFER: {
         return <ShareTransferForm
                     onSubmit={onSubmit}
                     onCancel={onClose}
-                    translations={translations}
                     transactionToEdit={transactionToEdit as ShareTransferTransaction}
                     stakeholders={stakeholders}
                     capTable={capTable}
                     projectCurrency={projectCurrency}
-                    language={language}
                 />
       }
       case TransactionType.EQUALIZATION_PURCHASE:
           return <EqualizationForm
                     onSubmit={onSubmit}
                     onCancel={onClose}
-                    translations={translations}
                     transactionToEdit={transactionToEdit as EqualizationPurchaseTransaction}
                     stakeholders={stakeholders}
-                    language={language}
                     allTransactions={transactions}
                     allShareClasses={allShareClasses}
                     projectCurrency={projectCurrency}
@@ -132,16 +120,13 @@ function TransactionFormModal({
         return <DebtForm
                   onSubmit={onSubmit}
                   onCancel={onClose}
-                  translations={translations}
                   transactionToEdit={transactionToEdit as DebtInstrumentTransaction}
                   projectCurrency={projectCurrency}
-                  language={language}
                />;
       case TransactionType.UPDATE_SHARE_CLASS: {
         return <UpdateShareClassForm
                     onSubmit={onSubmit}
                     onCancel={onClose}
-                    translations={translations}
                     transactionToEdit={transactionToEdit as UpdateShareClassTransaction}
                     allShareClasses={allShareClasses}
                     allTransactions={transactions}
@@ -158,12 +143,12 @@ function TransactionFormModal({
       onClick={onClose}
     >
       <div 
-        className="relative bg-theme-surface rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6"
+        className="relative bg-surface rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6"
         onClick={e => e.stopPropagation()}
       >
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 text-theme-secondary hover:text-theme-primary"
+          className="absolute top-4 right-4 text-secondary hover:text-primary"
           aria-label="Close"
         >
           <CloseIcon />

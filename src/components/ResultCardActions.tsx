@@ -1,20 +1,21 @@
 
+
 import React, { useState, useRef, useEffect } from 'react';
-import type { Translations } from '../i18n';
 import PrintIcon from '../styles/icons/PrintIcon';
 import DownloadIcon from '../styles/icons/DownloadIcon';
+import { useLocalization } from '../contexts/LocalizationContext';
 
 interface ResultCardActionsProps {
   onPrint: () => void;
   onExport: (format: 'png' | 'pdf') => void;
-  translations: Translations;
 }
 
-function ResultCardActions({ onPrint, onExport, translations }: ResultCardActionsProps) {
+function ResultCardActions({ onPrint, onExport }: ResultCardActionsProps) {
+  const { t: translations } = useLocalization();
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
-  const buttonClasses = "p-2 rounded-md transition-colors text-theme-secondary hover:bg-theme-subtle focus:outline-none focus:ring-2 focus:ring-offset-2 ring-theme-interactive";
+  const buttonClasses = "p-2 rounded-md transition-colors text-secondary hover:bg-background-subtle focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -43,17 +44,17 @@ function ResultCardActions({ onPrint, onExport, translations }: ResultCardAction
         </button>
 
         {isExportMenuOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-theme-surface rounded-md shadow-lg z-10 border border-theme-subtle">
+          <div className="absolute right-0 mt-2 w-48 bg-surface rounded-md shadow-lg z-10 border border-subtle">
             <div className="py-1">
               <button
                 onClick={() => handleExport('png')}
-                className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-theme-primary hover:bg-theme-subtle"
+                className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-primary hover:bg-background-subtle"
               >
                 <span>{translations.exportAsPng}</span>
               </button>
               <button
                 onClick={() => handleExport('pdf')}
-                className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-theme-primary hover:bg-theme-subtle"
+                className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-primary hover:bg-background-subtle"
               >
                 <span>{translations.exportAsPdf}</span>
               </button>

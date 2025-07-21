@@ -1,13 +1,13 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
-import type { Translations } from '../i18n';
 import type { LegalTab } from '../types';
 import CloseIcon from '../styles/icons/CloseIcon';
+import { useLocalization } from '../contexts/LocalizationContext';
 
 interface LegalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  translations: Translations;
   initialTab?: LegalTab;
 }
 
@@ -34,7 +34,8 @@ const parseContent = (text: string): React.ReactNode[] => {
 };
 
 
-function LegalModal({ isOpen, onClose, translations, initialTab = 'impressum' }: LegalModalProps) {
+function LegalModal({ isOpen, onClose, initialTab = 'impressum' }: LegalModalProps) {
+  const { t: translations } = useLocalization();
   const [activeTab, setActiveTab] = useState<LegalTab>(initialTab);
   const modalRef = useRef<HTMLDivElement>(null);
   const firstTabRef = useRef<HTMLButtonElement>(null);
@@ -94,10 +95,10 @@ function LegalModal({ isOpen, onClose, translations, initialTab = 'impressum' }:
   };
   
   const tabButtonClasses = (tabName: LegalTab) => 
-    `px-4 py-2 text-sm font-medium rounded-t-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-theme-interactive ${
+    `px-4 py-2 text-sm font-medium rounded-t-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-interactive ${
       activeTab === tabName 
-        ? 'bg-theme-surface text-theme-primary border-b-2 border-theme-interactive' 
-        : 'text-theme-secondary hover:bg-theme-subtle hover:text-theme-primary'
+        ? 'bg-surface text-primary border-b-2 border-interactive' 
+        : 'text-secondary hover:bg-background-subtle hover:text-primary'
     }`;
     
   const { title, content } = renderContent();
@@ -112,21 +113,21 @@ function LegalModal({ isOpen, onClose, translations, initialTab = 'impressum' }:
     >
       <div 
         ref={modalRef}
-        className="relative bg-theme-surface rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col"
+        className="relative bg-surface rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center p-4 border-b border-theme-subtle">
-            <h3 id="legal-modal-title" className="text-xl font-semibold text-theme-primary">{translations.legal.title}</h3>
+        <div className="flex justify-between items-center p-4 border-b border-subtle">
+            <h3 id="legal-modal-title" className="text-xl font-semibold text-primary">{translations.legal.title}</h3>
             <button 
                 onClick={onClose} 
-                className="text-theme-secondary hover:text-theme-primary"
+                className="text-secondary hover:text-primary"
                 aria-label="Close"
             >
                 <CloseIcon />
             </button>
         </div>
         
-        <div className="border-b border-theme-subtle px-4">
+        <div className="border-b border-subtle px-4">
             <nav className="-mb-px flex space-x-4" aria-label="Tabs">
                 <button ref={firstTabRef} onClick={() => setActiveTab('impressum')} className={tabButtonClasses('impressum')}>
                     {translations.legal.tabImpressum}
@@ -141,8 +142,8 @@ function LegalModal({ isOpen, onClose, translations, initialTab = 'impressum' }:
         </div>
 
         <div className="p-6 overflow-y-auto">
-          <h4 className="text-lg font-bold text-theme-primary mb-4">{title}</h4>
-          <div className="prose prose-sm text-theme-secondary max-w-none">
+          <h4 className="text-lg font-bold text-primary mb-4">{title}</h4>
+          <div className="prose prose-sm text-secondary max-w-none">
             {parseContent(content)}
           </div>
         </div>

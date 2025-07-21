@@ -1,4 +1,6 @@
 
+
+
 import React from 'react';
 import { Handle, Position } from 'reactflow';
 import type { NodeProps } from 'reactflow';
@@ -17,14 +19,14 @@ function WorkflowCustomNode({ data, isConnectable }: NodeProps<CustomNodeData>) 
 
   const nodeClasses = `
     w-64 rounded-xl shadow-md border-2
-    ${isDisabled ? 'bg-theme-subtle border-theme-subtle' : 'bg-theme-surface border-theme-interactive'}
+    ${isDisabled ? 'bg-background-subtle border-subtle' : 'bg-surface border-interactive'}
     ${isClickable && !isDisabled ? 'cursor-pointer hover:shadow-lg hover:scale-[1.02]' : 'cursor-default'}
     transition-all duration-200
   `;
   
-  const textClasses = isDisabled ? 'text-theme-subtle' : 'text-theme-primary';
-  const descClasses = isDisabled ? 'text-theme-subtle' : 'text-theme-secondary';
-  const handleClasses = '!bg-theme-border-strong !w-3 !h-3';
+  const textClasses = isDisabled ? 'text-subtle' : 'text-primary';
+  const descClasses = isDisabled ? 'text-subtle' : 'text-secondary';
+  const handleClasses = '!bg-strong !w-3 !h-3';
 
   return (
     <div className={nodeClasses}>
@@ -34,7 +36,7 @@ function WorkflowCustomNode({ data, isConnectable }: NodeProps<CustomNodeData>) 
         <p className={`text-sm mt-1 ${descClasses}`}>{description}</p>
         
         {isClickable && !isDisabled && ctaText && (
-          <div className="mt-4 text-theme-on-interactive bg-theme-interactive rounded-lg p-2 flex items-center justify-center font-semibold">
+          <div className="mt-4 text-on-interactive bg-interactive rounded-lg p-2 flex items-center justify-center font-semibold">
             <span>{ctaText}</span>
             <ChevronRightIcon className="w-5 h-5 ml-2" />
           </div>

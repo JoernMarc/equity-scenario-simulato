@@ -1,20 +1,19 @@
 
 
 import React, { useMemo } from 'react';
-import type { Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, Language, ShareClass, DebtInstrumentTransaction, UpdateShareClassTransaction, Stakeholder, EqualizationPurchaseTransaction } from '../types';
+import type { Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, ShareClass, DebtInstrumentTransaction, UpdateShareClassTransaction, Stakeholder, EqualizationPurchaseTransaction } from '../types';
 import { TransactionType, TransactionStatus, ConversionMechanism } from '../types';
 import type { Translations } from '../i18n';
 import PencilIcon from '../styles/icons/PencilIcon';
 import TrashIcon from '../styles/icons/TrashIcon';
 import { getShareClassesAsOf } from '../logic/calculations';
 import { snakeToCamel } from '../logic/utils';
+import { useLocalization } from '../contexts/LocalizationContext';
 
 interface TransactionListProps {
   transactions: Transaction[];
   allTransactions: Transaction[]; // For looking up converted loans
   stakeholders: Stakeholder[];
-  translations: Translations;
-  language: Language;
   onEdit: (transaction: Transaction) => void;
   onDelete: (transactionId: string) => void;
   isFoundingDeletable: boolean;
@@ -48,11 +47,11 @@ const getIsUsed = (tx: Transaction, simulationDate: string): boolean => {
 
 function TransactionCard({ title, date, locale, actions, children }: { title: string; date: string; locale: string; actions?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="bg-theme-surface p-4 rounded-lg shadow-sm border border-theme-subtle">
+    <div className="bg-surface p-4 rounded-lg shadow-sm border border-subtle">
       <div className="flex justify-between items-start mb-3">
-        <h4 className="font-bold text-theme-interactive pr-4">{title}</h4>
+        <h4 className="font-bold text-interactive pr-4">{title}</h4>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-sm text-theme-secondary">{new Date(date).toLocaleDateString(locale)}</span>
+          <span className="text-sm text-secondary">{new Date(date).toLocaleDateString(locale)}</span>
           {actions}
         </div>
       </div>
@@ -69,9 +68,9 @@ const DetailItem = ({ label, value, isNumeric = false, unit, isCurrency=false, l
 
     return (
         <div className="grid grid-cols-3 gap-2">
-            <dt className="font-semibold text-theme-secondary col-span-1">{label}</dt>
-            <dd className={`text-theme-primary col-span-2 ${isNumeric ? 'text-right font-mono' : ''}`}>
-                 {displayValue} {unit && <span className="text-theme-secondary ml-1">{unit}</span>}
+            <dt className="font-semibold text-secondary col-span-1">{label}</dt>
+            <dd className={`text-primary col-span-2 ${isNumeric ? 'text-right font-mono' : ''}`}>
+                 {displayValue} {unit && <span className="text-secondary ml-1">{unit}</span>}
             </dd>
         </div>
     );
@@ -86,8 +85,8 @@ const ShareClassDetails = ({ shareClass, translations }: { shareClass: ShareClas
     const antiDilutionType = (translations[antiDilutionTypeKey] as string) || shareClass.antiDilutionProtection;
 
     return (
-        <div className="p-3 bg-theme-background rounded-md border border-theme-subtle mt-2 space-y-2">
-            <h5 className="font-bold text-theme-primary">{shareClass.name}</h5>
+        <div className="p-3 bg-background rounded-md border border-subtle mt-2 space-y-2">
+            <h5 className="font-bold text-primary">{shareClass.name}</h5>
              <DetailItem label={translations.liquidationPreference} value={`${shareClass.liquidationPreferenceRank} / ${shareClass.liquidationPreferenceFactor}x / ${liqPrefType} ${shareClass.liquidationPreferenceType === 'CAPPED_PARTICIPATING' ? `(${shareClass.participationCapFactor}x Cap)` : ''}`} />
              <DetailItem label={translations.antiDilutionProtection} value={antiDilutionType} />
              <DetailItem label={translations.votesPerShare} value={shareClass.votesPerShare} />
@@ -96,17 +95,17 @@ const ShareClassDetails = ({ shareClass, translations }: { shareClass: ShareClas
 };
 
 
-function TransactionList({ transactions, allTransactions, stakeholders, translations, language, onEdit, onDelete, isFoundingDeletable, searchQuery, simulationDate, projectCurrency }: TransactionListProps) {
+function TransactionList({ transactions, allTransactions, stakeholders, onEdit, onDelete, isFoundingDeletable, searchQuery, simulationDate, projectCurrency }: TransactionListProps) {
+  const { t: translations, locale } = useLocalization();
+
   if (transactions.length === 0) {
     return (
-      <div className="text-center py-10 px-4 bg-theme-surface rounded-lg shadow-sm border border-theme-subtle">
-        <p className="text-theme-secondary">{searchQuery ? translations.noSearchResults : translations.noTransactions}</p>
+      <div className="text-center py-10 px-4 bg-surface rounded-lg shadow-sm border border-subtle">
+        <p className="text-secondary">{searchQuery ? translations.noSearchResults : translations.noTransactions}</p>
       </div>
     );
   }
 
-  const locale = language === 'de' ? 'de-DE' : 'en-US';
-  
   const allShareClassesAsOfNow = useMemo(() => {
     return getShareClassesAsOf(allTransactions, new Date().toISOString().split('T')[0]);
   }, [allTransactions]);
@@ -116,10 +115,10 @@ function TransactionList({ transactions, allTransactions, stakeholders, translat
     const canDeleteFounding = isFounding && isFoundingDeletable;
 
     const actionButtons = (
-      <div className="flex items-center gap-1 border-l border-theme-subtle ml-2 pl-2">
+      <div className="flex items-center gap-1 border-l border-subtle ml-2 pl-2">
         <button 
             onClick={() => onEdit(tx)} 
-            className="p-1 text-theme-secondary hover:text-theme-interactive hover:bg-theme-subtle rounded-md"
+            className="p-1 text-secondary hover:text-interactive hover:bg-background-subtle rounded-md"
             aria-label={translations.edit}
             title={translations.edit}
         >
@@ -128,7 +127,7 @@ function TransactionList({ transactions, allTransactions, stakeholders, translat
         <button 
             onClick={() => onDelete(tx.id)} 
             disabled={isFounding && !canDeleteFounding}
-            className="p-1 text-theme-secondary hover:text-theme-danger hover:bg-theme-subtle rounded-md disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1 text-secondary hover:text-danger hover:bg-background-subtle rounded-md disabled:opacity-30 disabled:cursor-not-allowed"
             aria-label={translations.delete}
             title={isFounding && !canDeleteFounding ? translations.deleteDisabledTooltip : translations.delete}
         >
@@ -145,13 +144,13 @@ function TransactionList({ transactions, allTransactions, stakeholders, translat
     }[tx.status];
 
     const statusBadgeColor = {
-      [TransactionStatus.DRAFT]: 'bg-theme-subtle text-theme-secondary',
-      [TransactionStatus.ACTIVE]: 'bg-theme-success-subtle-bg text-theme-success-subtle-text',
-      [TransactionStatus.ARCHIVED]: 'bg-theme-danger-subtle-bg text-theme-danger-subtle-text',
+      [TransactionStatus.DRAFT]: 'bg-background-subtle text-secondary',
+      [TransactionStatus.ACTIVE]: 'bg-success-subtle-bg text-success-subtle-text',
+      [TransactionStatus.ARCHIVED]: 'bg-danger-subtle-bg text-danger-subtle-text',
     }[tx.status];
 
     const metaInfo = (
-        <div className="mt-3 pt-3 border-t border-theme-subtle flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-theme-secondary">
+        <div className="mt-3 pt-3 border-t border-subtle flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-secondary">
             <div className="flex items-center gap-2">
                 <strong>{translations.status}:</strong>
                 <span className={`px-2 py-0.5 rounded-full font-medium text-xs ${statusBadgeColor}`}>
@@ -169,7 +168,7 @@ function TransactionList({ transactions, allTransactions, stakeholders, translat
                 </div>
             )}
             <div className="flex items-center gap-2">
-                <input type="checkbox" checked={isUsed} readOnly className="h-4 w-4 rounded border-theme-strong accent-theme-interactive" id={`used-checkbox-${tx.id}`} />
+                <input type="checkbox" checked={isUsed} readOnly className="h-4 w-4 rounded border-strong accent-interactive" id={`used-checkbox-${tx.id}`} />
                 <label htmlFor={`used-checkbox-${tx.id}`} className="font-medium">{translations.used}</label>
             </div>
         </div>
@@ -182,18 +181,18 @@ function TransactionList({ transactions, allTransactions, stakeholders, translat
         return (
           <TransactionCard title={`${translations.founding}: ${foundingTx.companyName}`} date={foundingTx.date} key={tx.id} actions={actionButtons} locale={locale}>
             <DetailItem label={translations.legalForm} value={foundingTx.legalForm} />
-            <p className="font-semibold mt-2 text-theme-secondary">{translations.shareholdings}:</p>
-            <ul className="space-y-1 text-theme-secondary">
+            <p className="font-semibold mt-2 text-secondary">{translations.shareholdings}:</p>
+            <ul className="space-y-1 text-secondary">
               {foundingTx.shareholdings.map(sh => {
                 const pricePerShare = (sh.investment ?? 0) > 0 && sh.shares > 0 ? (sh.investment ?? 0) / sh.shares : 0;
                 return (
-                 <li key={sh.id} className="flex justify-between items-baseline p-1 bg-theme-subtle rounded-md">
-                    <span className="text-theme-primary">
+                 <li key={sh.id} className="flex justify-between items-baseline p-1 bg-background-subtle rounded-md">
+                    <span className="text-primary">
                       {sh.stakeholderName}: {sh.shares.toLocaleString(locale)} {shareClassMap.get(sh.shareClassId) || 'N/A'}
                       {(sh.investment ?? 0) > 0 && ` (${(sh.investment ?? 0).toLocaleString(locale, {style:'currency', currency: projectCurrency})})`}
                     </span>
                     {pricePerShare > 0 && 
-                      <span className="text-theme-secondary text-xs font-mono">
+                      <span className="text-secondary text-xs font-mono">
                         {pricePerShare.toLocaleString(locale, {style:'currency', currency: projectCurrency, minimumFractionDigits: 2, maximumFractionDigits: 4 })}/{translations.perShare}
                       </span>
                     }
@@ -235,7 +234,7 @@ function TransactionList({ transactions, allTransactions, stakeholders, translat
             <DetailItem label={translations.investmentAmount} value={loanTx.amount} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency} />
             {loanTx.interestRate && <DetailItem label={translations.interestRate} value={`${(loanTx.interestRate * 100).toFixed(1)}%`} isNumeric />}
             
-            <div className="mt-2 pt-2 border-t border-theme-subtle">
+            <div className="mt-2 pt-2 border-t border-subtle">
               {mechanismDetails}
               <DetailItem label={translations.seniority} value={seniorityText} />
             </div>
@@ -260,17 +259,17 @@ function TransactionList({ transactions, allTransactions, stakeholders, translat
             <DetailItem label={translations.postMoneyValuation} value={postMoneyValuation} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
             
             <div className="pt-2">
-                <p className="font-semibold mb-1 text-theme-secondary">{translations.newShareClassDetails}:</p>
+                <p className="font-semibold mb-1 text-secondary">{translations.newShareClassDetails}:</p>
                 <ShareClassDetails shareClass={roundTx.newShareClass} translations={translations} />
             </div>
 
             <div className="pt-2">
-                <p className="font-semibold mt-2 text-theme-secondary">{translations.investors}:</p>
-                <ul className="space-y-1 text-theme-secondary">
+                <p className="font-semibold mt-2 text-secondary">{translations.investors}:</p>
+                <ul className="space-y-1 text-secondary">
                 {roundTx.newShareholdings.map(s => (
-                    <li key={s.id} className="flex justify-between items-baseline p-1 bg-theme-subtle rounded-md">
-                        <span className="text-theme-primary">{s.stakeholderName}: {(s.investment || 0).toLocaleString(locale, {style:'currency', currency: projectCurrency})}</span>
-                        <span className="text-theme-secondary text-xs font-mono">{s.shares.toLocaleString(locale)} {translations.shares}</span>
+                    <li key={s.id} className="flex justify-between items-baseline p-1 bg-background-subtle rounded-md">
+                        <span className="text-primary">{s.stakeholderName}: {(s.investment || 0).toLocaleString(locale, {style:'currency', currency: projectCurrency})}</span>
+                        <span className="text-secondary text-xs font-mono">{s.shares.toLocaleString(locale)} {translations.shares}</span>
                     </li>
                 ))}
                 </ul>
@@ -278,10 +277,10 @@ function TransactionList({ transactions, allTransactions, stakeholders, translat
             
             {convertedLoans.length > 0 && (
                  <div className="pt-2">
-                    <p className="font-semibold mt-2 text-theme-secondary">{translations.convertedLoans}:</p>
-                    <ul className="list-disc pl-5 text-theme-secondary">
+                    <p className="font-semibold mt-2 text-secondary">{translations.convertedLoans}:</p>
+                    <ul className="list-disc pl-5 text-secondary">
                         {convertedLoans.map(loan => (
-                            <li key={loan.id} className="text-theme-primary">{loan.investorName} - {loan.amount.toLocaleString(locale, {style:'currency', currency: projectCurrency})}</li>
+                            <li key={loan.id} className="text-primary">{loan.investorName} - {loan.amount.toLocaleString(locale, {style:'currency', currency: projectCurrency})}</li>
                         ))}
                     </ul>
                 </div>
@@ -364,17 +363,21 @@ function TransactionList({ transactions, allTransactions, stakeholders, translat
           return (
             <TransactionCard title={translations.updateShareClass} date={updateTx.date} key={tx.id} actions={actionButtons} locale={locale}>
                 <DetailItem label={translations.shareClassName} value={newShareClassState?.name || 'N/A'} />
-                <p className="font-semibold mt-2 text-theme-secondary">{translations.updatedProperties}:</p>
+                <p className="font-semibold mt-2 text-secondary">{translations.updatedProperties}:</p>
                 <div className="space-y-1 pl-2">
                     {Object.entries(updateTx.updatedProperties).map(([key, value]) => {
                         const oldValue = oldShareClassState ? (oldShareClassState as any)[key] : 'N/A';
-                        const keyTranslation = (translations[snakeToCamel(key) as keyof Translations] as string) || key;
+                        const tKey = (key === 'name' ? 'shareClassName' : key) as keyof Translations;
+                        
+                        const translationCandidate = translations[tKey];
+                        const keyTranslation = typeof translationCandidate === 'string' ? translationCandidate : key;
+                            
                         return (
                             <div key={key} className="text-sm">
-                                <span className="font-medium text-theme-primary">{keyTranslation}: </span>
-                                <span className="text-theme-danger font-mono">{oldValue?.toString() || 'N/A'}</span>
-                                <span className="text-theme-secondary mx-1">➔</span>
-                                <span className="text-theme-success font-mono">{value?.toString() || 'N/A'}</span>
+                                <span className="font-medium text-primary">{keyTranslation}: </span>
+                                <span className="text-danger font-mono">{oldValue?.toString() || 'N/A'}</span>
+                                <span className="text-secondary mx-1">➔</span>
+                                <span className="text-success font-mono">{value?.toString() || 'N/A'}</span>
                             </div>
                         );
                     })}

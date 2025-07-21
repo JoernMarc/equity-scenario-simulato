@@ -1,28 +1,27 @@
 
+
 import React, { useState } from 'react';
-import type { ConvertibleLoanTransaction, Stakeholder, Language } from '../../types';
+import type { ConvertibleLoanTransaction, Stakeholder } from '../../types';
 import { TransactionType, TransactionStatus, ConversionMechanism } from '../../types';
 import type { Translations } from '../../i18n';
 import HelpTooltip from '../HelpTooltip';
 import { snakeToCamel } from '../../logic/utils';
 import CurrencyInput from '../common/CurrencyInput';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 interface ConvertibleLoanFormProps {
   onSubmit: (transaction: ConvertibleLoanTransaction) => void;
   onCancel: () => void;
-  translations: Translations;
   transactionToEdit?: ConvertibleLoanTransaction;
   stakeholders: Stakeholder[];
   projectCurrency: string;
-  language: Language;
 }
 
 const seniorityLevels: ConvertibleLoanTransaction['seniority'][] = ['SENIOR_UNSECURED', 'SUBORDINATED'];
 
-function ConvertibleLoanForm({ onSubmit, onCancel, translations, transactionToEdit, stakeholders, projectCurrency, language }: ConvertibleLoanFormProps) {
+function ConvertibleLoanForm({ onSubmit, onCancel, transactionToEdit, stakeholders, projectCurrency }: ConvertibleLoanFormProps) {
+  const { t, locale } = useLocalization();
   const isEditing = !!transactionToEdit;
-  const t = translations;
-  const locale = language === 'de' ? 'de-DE' : 'en-US';
 
   // Basic info
   const [date, setDate] = useState(transactionToEdit?.date || new Date().toISOString().split('T')[0]);
@@ -84,7 +83,7 @@ function ConvertibleLoanForm({ onSubmit, onCancel, translations, transactionToEd
     onSubmit(transaction);
   };
 
-  const baseInputClasses = "mt-1 block w-full px-3 py-2 bg-theme-surface border border-theme-strong rounded-md shadow-sm focus:outline-none focus:ring-theme-interactive focus:border-theme-interactive";
+  const baseInputClasses = "mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-interactive focus:border-interactive";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -92,27 +91,27 @@ function ConvertibleLoanForm({ onSubmit, onCancel, translations, transactionToEd
         {stakeholders.map(s => <option key={s.id} value={s.name} />)}
       </datalist>
 
-      <h3 className="text-xl font-semibold text-theme-primary flex items-center gap-2">{isEditing ? t.editConvertible : t.addConvertible} <HelpTooltip text={t.help.convertibleLoan} /></h3>
+      <h3 className="text-xl font-semibold text-primary flex items-center gap-2">{isEditing ? t.editConvertible : t.addConvertible} <HelpTooltip text={t.help.convertibleLoan} /></h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="investorName" className="block text-sm font-medium text-theme-secondary">{t.investorName}</label>
+          <label htmlFor="investorName" className="block text-sm font-medium text-secondary">{t.investorName}</label>
           <input type="text" id="investorName" value={investorName} onChange={e => setInvestorName(e.target.value)} required className={baseInputClasses} list="stakeholders-list" />
         </div>
         <div>
-          <label htmlFor="date" className="block text-sm font-medium text-theme-secondary">{t.date}</label>
+          <label htmlFor="date" className="block text-sm font-medium text-secondary">{t.date}</label>
           <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} required className={baseInputClasses}/>
         </div>
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-theme-secondary">{t.investmentAmount}</label>
-          <CurrencyInput value={amount} onChange={setAmount} required id="amount" currency={projectCurrency} locale={locale} />
+          <label htmlFor="amount" className="block text-sm font-medium text-secondary">{t.investmentAmount}</label>
+          <CurrencyInput value={amount} onChange={setAmount} required id="amount" currency={projectCurrency} />
         </div>
         <div>
-          <label htmlFor="interestRate" className="block text-sm font-medium text-theme-secondary">{t.interestRate} <span className="text-theme-subtle">({t.optional})</span></label>
+          <label htmlFor="interestRate" className="block text-sm font-medium text-secondary">{t.interestRate} <span className="text-subtle">({t.optional})</span></label>
           <input type="number" id="interestRate" min="0" value={interestRate} onChange={e => setInterestRate(e.target.value === '' ? '' : parseFloat(e.target.value))} className={`${baseInputClasses} text-right`}/>
         </div>
          <div>
-            <label htmlFor="seniority" className="block text-sm font-medium text-theme-secondary">{t.seniority}</label>
+            <label htmlFor="seniority" className="block text-sm font-medium text-secondary">{t.seniority}</label>
             <select id="seniority" value={seniority} onChange={e => setSeniority(e.target.value as ConvertibleLoanTransaction['seniority'])} required className={baseInputClasses}>
                 {seniorityLevels.map(level => {
                     const key = snakeToCamel(level) as keyof Translations;
@@ -121,7 +120,7 @@ function ConvertibleLoanForm({ onSubmit, onCancel, translations, transactionToEd
             </select>
         </div>
         <div>
-            <label htmlFor="conversionMechanism" className="flex items-center text-sm font-medium text-theme-secondary">
+            <label htmlFor="conversionMechanism" className="flex items-center text-sm font-medium text-secondary">
                 {t.conversionMechanism}
                 <HelpTooltip text={t.help.conversionMechanism} />
             </label>
@@ -134,17 +133,17 @@ function ConvertibleLoanForm({ onSubmit, onCancel, translations, transactionToEd
       </div>
       
       {conversionMechanism === ConversionMechanism.CAP_AND_DISCOUNT && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-theme-subtle rounded-md border border-theme-subtle">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-background-subtle rounded-md border border-subtle">
             <div>
-              <label htmlFor="valuationCap" className="flex items-center text-sm font-medium text-theme-secondary">
-                {t.valuationCap} <span className="text-theme-subtle">({t.optional})</span>
+              <label htmlFor="valuationCap" className="flex items-center text-sm font-medium text-secondary">
+                {t.valuationCap} <span className="text-subtle">({t.optional})</span>
                 <HelpTooltip text={t.help.valuationCap} />
               </label>
-              <CurrencyInput value={valuationCap} onChange={setValuationCap} id="valuationCap" currency={projectCurrency} locale={locale} />
+              <CurrencyInput value={valuationCap} onChange={setValuationCap} id="valuationCap" currency={projectCurrency} />
             </div>
             <div>
-              <label htmlFor="discount" className="flex items-center text-sm font-medium text-theme-secondary">
-                {t.discount} <span className="text-theme-subtle">({t.optional})</span>
+              <label htmlFor="discount" className="flex items-center text-sm font-medium text-secondary">
+                {t.discount} <span className="text-subtle">({t.optional})</span>
                 <HelpTooltip text={t.help.discount} />
               </label>
               <input type="number" id="discount" min="0" max="100" value={discount} onChange={e => setDiscount(e.target.value === '' ? '' : parseFloat(e.target.value))} className={`${baseInputClasses} text-right`}/>
@@ -153,39 +152,39 @@ function ConvertibleLoanForm({ onSubmit, onCancel, translations, transactionToEd
       )}
 
       {conversionMechanism === ConversionMechanism.FIXED_PRICE && (
-        <div className="p-4 bg-theme-subtle rounded-md border border-theme-subtle">
-            <label htmlFor="fixedConversionPrice" className="flex items-center text-sm font-medium text-theme-secondary">
+        <div className="p-4 bg-background-subtle rounded-md border border-subtle">
+            <label htmlFor="fixedConversionPrice" className="flex items-center text-sm font-medium text-secondary">
                 {t.fixedConversionPrice.replace('{currency}', projectCurrency)}
                 <HelpTooltip text={t.help.fixedPrice} />
             </label>
-            <CurrencyInput value={fixedConversionPrice} onChange={setFixedConversionPrice} id="fixedConversionPrice" required currency={projectCurrency} locale={locale} />
+            <CurrencyInput value={fixedConversionPrice} onChange={setFixedConversionPrice} id="fixedConversionPrice" required currency={projectCurrency} />
         </div>
       )}
 
       {conversionMechanism === ConversionMechanism.FIXED_RATIO && (
-        <div className="p-4 bg-theme-subtle rounded-md border border-theme-subtle">
-             <label className="flex items-center text-sm font-medium text-theme-secondary mb-2">
+        <div className="p-4 bg-background-subtle rounded-md border border-subtle">
+             <label className="flex items-center text-sm font-medium text-secondary mb-2">
                 {t.fixedRatio}
                 <HelpTooltip text={t.help.fixedRatio} />
             </label>
             <div className="flex items-center gap-4">
                 <div className="flex-1">
-                    <label htmlFor="ratioShares" className="text-xs text-theme-secondary">{t.ratioShares}</label>
+                    <label htmlFor="ratioShares" className="text-xs text-secondary">{t.ratioShares}</label>
                     <input type="number" id="ratioShares" min="1" value={ratioShares} onChange={e => setRatioShares(e.target.value === '' ? '' : parseFloat(e.target.value))} className={`${baseInputClasses} text-right`} required />
                 </div>
                 <div className="flex-1">
-                    <label htmlFor="ratioAmount" className="text-xs text-theme-secondary">{t.forAmount.replace('{currency}', projectCurrency)}</label>
-                    <CurrencyInput value={ratioAmount} onChange={setRatioAmount} id="ratioAmount" required currency={projectCurrency} locale={locale} />
+                    <label htmlFor="ratioAmount" className="text-xs text-secondary">{t.forAmount.replace('{currency}', projectCurrency)}</label>
+                    <CurrencyInput value={ratioAmount} onChange={setRatioAmount} id="ratioAmount" required currency={projectCurrency} />
                 </div>
             </div>
         </div>
       )}
       
-      <div className="pt-4 mt-4 border-t border-theme-subtle">
-        <h4 className="text-lg font-medium text-theme-primary mb-2">{t.statusAndValidity}</h4>
+      <div className="pt-4 mt-4 border-t border-subtle">
+        <h4 className="text-lg font-medium text-primary mb-2">{t.statusAndValidity}</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-theme-secondary">{t.status}</label>
+              <label htmlFor="status" className="block text-sm font-medium text-secondary">{t.status}</label>
               <select id="status" value={status} onChange={e => setStatus(e.target.value as TransactionStatus)} required className={baseInputClasses}>
                 <option value={TransactionStatus.DRAFT}>{t.draft}</option>
                 <option value={TransactionStatus.ACTIVE}>{t.active}</option>
@@ -193,19 +192,19 @@ function ConvertibleLoanForm({ onSubmit, onCancel, translations, transactionToEd
               </select>
             </div>
             <div>
-              <label htmlFor="validFrom" className="block text-sm font-medium text-theme-secondary">{t.validFrom}</label>
+              <label htmlFor="validFrom" className="block text-sm font-medium text-secondary">{t.validFrom}</label>
               <input type="date" id="validFrom" value={validFrom} onChange={e => setValidFrom(e.target.value)} required className={baseInputClasses}/>
             </div>
             <div>
-              <label htmlFor="validTo" className="block text-sm font-medium text-theme-secondary">{t.validTo} <span className="text-theme-subtle">({t.optional})</span></label>
+              <label htmlFor="validTo" className="block text-sm font-medium text-secondary">{t.validTo} <span className="text-subtle">({t.optional})</span></label>
               <input type="date" id="validTo" value={validTo} onChange={e => setValidTo(e.target.value)} className={baseInputClasses}/>
             </div>
         </div>
       </div>
 
-      <div className="flex justify-end gap-4 pt-4 border-t border-theme-subtle">
-        <button type="button" onClick={onCancel} className="px-4 py-2 bg-theme-subtle text-theme-primary rounded-md hover:bg-theme-background">{t.cancel}</button>
-        <button type="submit" className="px-4 py-2 bg-theme-interactive text-theme-on-interactive rounded-md hover:bg-theme-interactive-hover">{isEditing ? t.update : t.save}</button>
+      <div className="flex justify-end gap-4 pt-4 border-t border-subtle">
+        <button type="button" onClick={onCancel} className="px-4 py-2 bg-background-subtle text-primary rounded-md hover:bg-background">{t.cancel}</button>
+        <button type="submit" className="px-4 py-2 bg-interactive text-on-interactive rounded-md hover:bg-interactive-hover">{isEditing ? t.update : t.save}</button>
       </div>
     </form>
   );

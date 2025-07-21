@@ -1,8 +1,9 @@
+
 import React from 'react';
 import ReactFlow, { Background, ReactFlowProvider } from 'reactflow';
 import type { Node, Edge } from 'reactflow';
-import type { Translations } from '../i18n';
 import WorkflowCustomNode from './WorkflowCustomNode';
+import { useLocalization } from '../contexts/LocalizationContext';
 
 const nodeTypes = {
   custom: WorkflowCustomNode,
@@ -10,10 +11,10 @@ const nodeTypes = {
 
 interface WorkflowDiagramProps {
   onNodeClick: (nodeId: string) => void;
-  translations: Translations;
 }
 
-function WorkflowDiagram({ onNodeClick, translations }: WorkflowDiagramProps) {
+function WorkflowDiagram({ onNodeClick }: WorkflowDiagramProps) {
+    const { t: translations } = useLocalization();
     const initialNodes: Node[] = [
       { id: '1', type: 'custom', data: { title: translations.workflowNodeFoundingTitle, description: translations.workflowNodeFoundingDesc, isClickable: true, isDisabled: false, ctaText: translations.workflowStartHere }, position: { x: 50, y: 50 } },
       { id: '2', type: 'custom', data: { title: translations.workflowNodeEarlyFinanceTitle, description: translations.workflowNodeEarlyFinanceDesc, isClickable: false, isDisabled: true }, position: { x: 400, y: 50 } },
@@ -36,7 +37,7 @@ function WorkflowDiagram({ onNodeClick, translations }: WorkflowDiagramProps) {
     };
 
   return (
-    <div style={{ height: '600px', width: '750px' }} className="bg-theme-subtle rounded-lg border border-theme-subtle shadow-md">
+    <div style={{ height: '600px', width: '750px' }} className="bg-background-subtle rounded-lg border border-subtle shadow-md">
       <ReactFlow
         nodes={initialNodes}
         edges={initialEdges}
