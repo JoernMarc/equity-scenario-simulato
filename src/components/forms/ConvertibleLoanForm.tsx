@@ -1,15 +1,12 @@
-
-
-
 import React, { useState } from 'react';
 import type { ConvertibleLoanTransaction } from '../../types';
 import { TransactionType, TransactionStatus, ConversionMechanism } from '../../types';
-import type { Translations } from '../../i18n';
 import HelpTooltip from '../HelpTooltip';
 import { snakeToCamel } from '../../logic/utils';
 import CurrencyInput from '../common/CurrencyInput';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { useProject } from '../../contexts/ProjectContext';
+import type { Translations } from '../../i18n';
 
 interface ConvertibleLoanFormProps {
   onSubmit: (transaction: ConvertibleLoanTransaction) => void;

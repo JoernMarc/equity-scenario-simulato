@@ -1,15 +1,12 @@
-
-
-
 import React, { useState } from 'react';
 import type { DebtInstrumentTransaction } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
-import type { Translations } from '../../i18n';
 import { snakeToCamel } from '../../logic/utils';
 import HelpTooltip from '../HelpTooltip';
 import CurrencyInput from '../common/CurrencyInput';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { useProject } from '../../contexts/ProjectContext';
+import type { Translations } from '../../i18n';
 
 interface DebtFormProps {
   onSubmit: (transaction: DebtInstrumentTransaction) => void;

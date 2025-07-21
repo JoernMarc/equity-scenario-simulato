@@ -1,13 +1,12 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import type { UpdateShareClassTransaction, ShareClass, LiquidationPreferenceType, AntiDilutionProtection } from '../../types';
-import type { Translations } from '../../i18n';
 import { TransactionType, TransactionStatus } from '../../types';
 import { ANTI_DILUTION_TYPES, LIQUIDATION_PREFERENCE_TYPES } from '../../constants';
 import { snakeToCamel } from '../../logic/utils';
 import HelpTooltip from '../HelpTooltip';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { useProject } from '../../contexts/ProjectContext';
+import type { Translations } from '../../i18n';
 
 interface UpdateShareClassFormProps {
   onSubmit: (transaction: UpdateShareClassTransaction) => void;

@@ -1,15 +1,13 @@
-
-
 import React, { useState, useMemo } from 'react';
 import type { FinancingRoundTransaction, Shareholding, ShareClass, ConvertibleLoanTransaction, LiquidationPreferenceType, AntiDilutionProtection } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
-import type { Translations } from '../../i18n';
 import { ANTI_DILUTION_TYPES, LIQUIDATION_PREFERENCE_TYPES } from '../../constants';
 import HelpTooltip from '../HelpTooltip';
 import { snakeToCamel } from '../../logic/utils';
 import CurrencyInput from '../common/CurrencyInput';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { useProject } from '../../contexts/ProjectContext';
+import type { Translations } from '../../i18n';
 
 interface NewInvestorInput {
     id: string;

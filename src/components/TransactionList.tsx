@@ -1,8 +1,9 @@
 
 
-import React, { useMemo } from 'react';
-import type { Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, ShareClass, DebtInstrumentTransaction, UpdateShareClassTransaction, EqualizationPurchaseTransaction } from '../types';
-import { TransactionType, TransactionStatus, ConversionMechanism } from '../types';
+
+import { useMemo } from 'react';
+import type { Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, ShareClass, DebtInstrumentTransaction, UpdateShareClassTransaction, EqualizationPurchaseTransaction } from '../../types';
+import { TransactionType, TransactionStatus, ConversionMechanism } from '../../types';
 import type { Translations } from '../i18n';
 import PencilIcon from '../styles/icons/PencilIcon';
 import TrashIcon from '../styles/icons/TrashIcon';
