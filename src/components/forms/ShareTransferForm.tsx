@@ -1,26 +1,26 @@
 
 
 import React, { useState, useMemo, useEffect } from 'react';
-import type { ShareTransferTransaction, Stakeholder, CapTable } from '../../types';
+import type { ShareTransferTransaction, CapTable } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
 import HelpTooltip from '../HelpTooltip';
 import CurrencyInput from '../common/CurrencyInput';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { useProject } from '../../contexts/ProjectContext';
 
 interface ShareTransferFormProps {
   onSubmit: (transaction: ShareTransferTransaction) => void;
   onCancel: () => void;
   transactionToEdit?: ShareTransferTransaction;
-  stakeholders: Stakeholder[];
   capTable: CapTable | null;
-  projectCurrency: string;
 }
 
 const baseInputClasses = "mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-interactive focus:border-interactive";
 
 
-function ShareTransferForm({ onSubmit, onCancel, transactionToEdit, stakeholders, capTable, projectCurrency }: ShareTransferFormProps) {
+function ShareTransferForm({ onSubmit, onCancel, transactionToEdit, capTable }: ShareTransferFormProps) {
   const { t, locale } = useLocalization();
+  const { stakeholders, projectCurrency } = useProject();
   const isEditing = !!transactionToEdit;
 
   // Form State

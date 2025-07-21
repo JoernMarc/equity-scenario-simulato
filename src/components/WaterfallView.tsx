@@ -1,19 +1,21 @@
 
+
 import { useState } from 'react';
 import type { WaterfallResult } from '../types';
 import ResultCardActions from './ResultCardActions';
 import { useLocalization } from '../contexts/LocalizationContext';
+import { useProject } from '../contexts/ProjectContext';
 
 interface WaterfallViewProps {
   result: WaterfallResult | null;
   onPrint: () => void;
   onExport: (format: 'png'|'pdf') => void;
   containerId: string;
-  projectCurrency: string;
 }
 
-function WaterfallView({ result, onPrint, onExport, containerId, projectCurrency }: WaterfallViewProps) {
+function WaterfallView({ result, onPrint, onExport, containerId }: WaterfallViewProps) {
   const { t: translations, locale } = useLocalization();
+  const { projectCurrency } = useProject();
   const [isLogVisible, setIsLogVisible] = useState(false);
 
   const formatCurrency = (amount: number, withSymbol: boolean = false) => {

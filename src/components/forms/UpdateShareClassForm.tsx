@@ -1,25 +1,26 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import type { UpdateShareClassTransaction, ShareClass, Transaction, LiquidationPreferenceType, AntiDilutionProtection } from '../../types';
+import type { UpdateShareClassTransaction, ShareClass, LiquidationPreferenceType, AntiDilutionProtection } from '../../types';
 import type { Translations } from '../../i18n';
 import { TransactionType, TransactionStatus } from '../../types';
 import { ANTI_DILUTION_TYPES, LIQUIDATION_PREFERENCE_TYPES } from '../../constants';
 import { snakeToCamel } from '../../logic/utils';
 import HelpTooltip from '../HelpTooltip';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { useProject } from '../../contexts/ProjectContext';
 
 interface UpdateShareClassFormProps {
   onSubmit: (transaction: UpdateShareClassTransaction) => void;
   onCancel: () => void;
   transactionToEdit?: UpdateShareClassTransaction;
-  allShareClasses: ShareClass[]; // Current state of all share classes
-  allTransactions: Transaction[];
 }
 
 const baseInputClasses = "mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-interactive focus:border-interactive";
 
-function UpdateShareClassForm({ onSubmit, onCancel, transactionToEdit, allShareClasses }: UpdateShareClassFormProps) {
+function UpdateShareClassForm({ onSubmit, onCancel, transactionToEdit }: UpdateShareClassFormProps) {
   const { t } = useLocalization();
+  const { allShareClasses: allShareClassesMap } = useProject();
+  const allShareClasses = useMemo(() => Array.from(allShareClassesMap.values()), [allShareClassesMap]);
   const isEditing = !!transactionToEdit;
 
   const [date, setDate] = useState(transactionToEdit?.date || new Date().toISOString().split('T')[0]);

@@ -1,28 +1,27 @@
 
 
 import React, { useState, useMemo } from 'react';
-import type { EqualizationPurchaseTransaction, Stakeholder, Transaction, ShareClass } from '../../types';
+import type { EqualizationPurchaseTransaction } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
 import type { Translations } from '../../i18n';
 import HelpTooltip from '../HelpTooltip';
 import CurrencyInput from '../common/CurrencyInput';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { useProject } from '../../contexts/ProjectContext';
 
 interface EqualizationFormProps {
   onSubmit: (transaction: EqualizationPurchaseTransaction) => void;
   onCancel: () => void;
   transactionToEdit?: EqualizationPurchaseTransaction;
-  stakeholders: Stakeholder[];
-  allTransactions: Transaction[];
-  allShareClasses: ShareClass[];
-  projectCurrency: string;
 }
 
 const baseInputClasses = "mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-interactive focus:border-interactive";
 
 
-function EqualizationForm({ onSubmit, onCancel, transactionToEdit, stakeholders, allTransactions, allShareClasses, projectCurrency }: EqualizationFormProps) {
+function EqualizationForm({ onSubmit, onCancel, transactionToEdit }: EqualizationFormProps) {
   const { t, locale } = useLocalization();
+  const { stakeholders, transactions: allTransactions, allShareClasses: allShareClassesMap, projectCurrency } = useProject();
+  const allShareClasses = useMemo(() => Array.from(allShareClassesMap.values()), [allShareClassesMap]);
   const isEditing = !!transactionToEdit;
 
   // Basic Info

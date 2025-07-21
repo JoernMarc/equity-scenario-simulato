@@ -10,8 +10,8 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-import type { Transaction, ConvertibleLoanTransaction, Shareholding, Stakeholder, WaterfallResult, TotalCapitalizationResult, TotalCapitalizationEntry, FinancingRoundTransaction, FoundingTransaction, ShareClass, BaseTransaction, VotingResult, SampleScenario, DebtInstrumentTransaction, FontSize, Theme, UpdateShareClassTransaction, ShareTransferTransaction, CapTable, EqualizationPurchaseTransaction, LegalTab, Project, ParsedImportData } from './types';
-import { TransactionType, TransactionStatus, FONT_SIZES, THEMES } from './types';
+import type { Transaction, Shareholding, Stakeholder, WaterfallResult, VotingResult, SampleScenario, FontSize, Theme, CapTable, LegalTab, Project, ParsedImportData } from './types';
+import { TransactionType, FONT_SIZES, THEMES } from './types';
 import Header from './components/Header';
 import TransactionList from './components/TransactionList';
 import TransactionFormModal from './components/TransactionFormModal';
@@ -21,7 +21,6 @@ import { calculateCapTable, simulateWaterfall, simulateVote } from './logic/calc
 import { exportToExcel, parseExcelImport } from './logic/importExport';
 import CapTableView from './components/CapTableView';
 import WaterfallView from './components/WaterfallView';
-import TotalCapitalizationView from './components/TotalCapitalizationView';
 import ImportExportModal from './components/ImportExportModal';
 import VotingView from './components/VotingView';
 import ProjectDashboard from './components/ProjectDashboard';
@@ -29,6 +28,7 @@ import Footer from './components/Footer';
 import LegalModal from './components/LegalModal';
 import { snakeToCamel } from './logic/utils';
 import { useLocalization } from './contexts/LocalizationContext';
+import { ProjectProvider } from './contexts/ProjectContext';
 import type { Translations } from './i18n';
 
 
@@ -42,7 +42,7 @@ const APP_STATE_STORAGE_KEY = 'capTableAppState_v2';
 const ACCESSIBILITY_STORAGE_KEY_PREFIX = 'capTableTheme_v2';
 
 function App() {
-  const { t, locale, language } = useLocalization();
+  const { t, language } = useLocalization();
   const [appState, setAppState] = useState<AppState>({ projects: {}, activeProjectId: null });
   const [theme, setTheme] = useState<Theme>('classic');
   const [fontSize, setFontSize] = useState<FontSize>('base');
@@ -103,15 +103,9 @@ function App() {
   // --- DERIVED STATE ---
   const activeProject = useMemo(() => appState.activeProjectId ? appState.projects[appState.activeProjectId] : null, [appState]);
   const transactions = useMemo(() => activeProject?.transactions || [], [activeProject]);
-  const stakeholders = useMemo(() => activeProject?.stakeholders || [], [activeProject]);
 
   const hasFoundingTransaction = useMemo(() => transactions.some(t => t.type === TransactionType.FOUNDING), [transactions]);
   const isFoundingDeletable = useMemo(() => transactions.length === 1 && hasFoundingTransaction, [transactions, hasFoundingTransaction]);
-
-  const projectCurrency = useMemo(() => {
-    const foundingTx = transactions.find(tx => tx.type === TransactionType.FOUNDING) as FoundingTransaction | undefined;
-    return foundingTx?.currency || 'EUR';
-  }, [transactions]);
 
   // Modal & Dialog states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -305,15 +299,6 @@ function App() {
     }
   };
   
-  const filteredTransactions = useMemo(() => {
-    if (!searchQuery) return transactions;
-    const lowerCaseQuery = searchQuery.toLowerCase();
-    return transactions.filter(tx => {
-      const txString = JSON.stringify(tx).toLowerCase();
-      return txString.includes(lowerCaseQuery);
-    });
-  }, [searchQuery, transactions]);
-
   const handleOpenImportExportModal = () => setIsImportExportModalOpen(true);
   const handleCloseImportExportModal = () => setIsImportExportModalOpen(false);
 
@@ -512,135 +497,131 @@ function App() {
             onLoadScenario={handleLoadScenario}
           />
         ) : (
-          <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8" ref={printRef}>
-            <div className="flex justify-between items-center flex-wrap gap-4">
-              <h2 className="text-2xl font-bold text-primary">{t.activeProject}: <span className="text-interactive">{activeProject.name}</span></h2>
-              <button onClick={handleBackToDashboard} className="text-sm text-interactive hover:underline">{t.backToDashboard}</button>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Left Column: Transactions */}
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center flex-wrap gap-4">
-                      <h3 className="text-xl font-semibold text-primary">{t.transactionLog}</h3>
-                       <div className="relative group">
-                          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover">
-                            <PlusIcon className="w-5 h-5" /> {t.addTransaction}
-                          </button>
-                          <div className="absolute right-0 mt-2 w-56 origin-top-right bg-surface border border-subtle rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-                              <div className="py-1">
-                                {Object.values(TransactionType).map(type => {
-                                    const translationKey = snakeToCamel(type) as keyof Translations;
-                                    const buttonText = t[translationKey];
-                                    return (
-                                        <button key={type} onClick={() => handleOpenModal(type)} className="w-full text-left block px-4 py-2 text-sm text-primary hover:bg-background-subtle">
-                                            {typeof buttonText === 'string' ? buttonText : translationKey}
-                                        </button>
-                                    );
-                                })}
-                              </div>
-                          </div>
-                       </div>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder={t.searchPlaceholder}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full px-4 py-2 bg-surface border border-strong rounded-md"
-                    />
-                    <TransactionList
-                        transactions={filteredTransactions}
-                        allTransactions={transactions}
-                        stakeholders={stakeholders}
-                        onEdit={handleEditTransaction}
-                        onDelete={(id) => handleDeleteRequest('transaction', id)}
-                        isFoundingDeletable={isFoundingDeletable}
-                        searchQuery={searchQuery}
-                        simulationDate={simulationDate}
-                        projectCurrency={projectCurrency}
-                    />
-                </div>
-                
-                {/* Right Column: Simulations & Results */}
-                <div className="space-y-8">
-                    <div>
-                        <h3 className="text-xl font-semibold text-primary mb-4">{t.resultsDisplay}</h3>
-                        <div className="flex items-center gap-4 mb-6">
-                            <label htmlFor="simulationDate" className="text-sm font-medium text-secondary whitespace-nowrap">{t.simulationDateLabel}:</label>
-                            <input
-                                type="date"
-                                id="simulationDate"
-                                value={simulationDate}
-                                onChange={(e) => setSimulationDate(e.target.value)}
-                                className="w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive"
-                            />
-                        </div>
-                         <CapTableView
-                            capTable={capTableResult}
-                            onPrint={() => handlePrint('cap-table-view')}
-                            onExport={(format) => handleExportImage(format, 'cap-table-view')}
-                            containerId="cap-table-view"
-                        />
-                    </div>
-                    
-                    {capTableResult && (
-                      <>
-                        <div className="space-y-4">
-                            <VotingView 
-                                result={votingResult}
-                                onPrint={() => handlePrint('voting-view')}
-                                onExport={(format) => handleExportImage(format, 'voting-view')}
-                                containerId="voting-view"
-                            />
-                            <div className="text-center">
-                                <button onClick={handleSimulateVote} className="px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover">{t.simulateVote}</button>
+          <ProjectProvider project={activeProject}>
+            <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8" ref={printRef}>
+              <div className="flex justify-between items-center flex-wrap gap-4">
+                <h2 className="text-2xl font-bold text-primary">{t.activeProject}: <span className="text-interactive">{activeProject.name}</span></h2>
+                <button onClick={handleBackToDashboard} className="text-sm text-interactive hover:underline">{t.backToDashboard}</button>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Left Column: Transactions */}
+                  <div className="space-y-6">
+                      <div className="flex justify-between items-center flex-wrap gap-4">
+                        <h3 className="text-xl font-semibold text-primary">{t.transactionLog}</h3>
+                        <div className="relative group">
+                            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover">
+                              <PlusIcon className="w-5 h-5" /> {t.addTransaction}
+                            </button>
+                            <div className="absolute right-0 mt-2 w-56 origin-top-right bg-surface border border-subtle rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                                <div className="py-1">
+                                  {Object.values(TransactionType).map(type => {
+                                      const translationKey = snakeToCamel(type) as keyof Translations;
+                                      const buttonText = t[translationKey];
+                                      return (
+                                          <button key={type} onClick={() => handleOpenModal(type)} className="w-full text-left block px-4 py-2 text-sm text-primary hover:bg-background-subtle">
+                                              {typeof buttonText === 'string' ? buttonText : translationKey}
+                                          </button>
+                                      );
+                                  })}
+                                </div>
                             </div>
                         </div>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder={t.searchPlaceholder}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full px-4 py-2 bg-surface border border-strong rounded-md"
+                      />
+                      <TransactionList
+                          onEdit={handleEditTransaction}
+                          onDelete={(id) => handleDeleteRequest('transaction', id)}
+                          isFoundingDeletable={isFoundingDeletable}
+                          searchQuery={searchQuery}
+                          simulationDate={simulationDate}
+                      />
+                  </div>
+                  
+                  {/* Right Column: Simulations & Results */}
+                  <div className="space-y-8">
+                      <div>
+                          <h3 className="text-xl font-semibold text-primary mb-4">{t.resultsDisplay}</h3>
+                          <div className="flex items-center gap-4 mb-6">
+                              <label htmlFor="simulationDate" className="text-sm font-medium text-secondary whitespace-nowrap">{t.simulationDateLabel}:</label>
+                              <input
+                                  type="date"
+                                  id="simulationDate"
+                                  value={simulationDate}
+                                  onChange={(e) => setSimulationDate(e.target.value)}
+                                  className="w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive"
+                              />
+                          </div>
+                          <CapTableView
+                              capTable={capTableResult}
+                              onPrint={() => handlePrint('cap-table-view')}
+                              onExport={(format) => handleExportImage(format, 'cap-table-view')}
+                              containerId="cap-table-view"
+                          />
+                      </div>
+                      
+                      {capTableResult && (
+                        <>
+                          <div className="space-y-4">
+                              <VotingView 
+                                  result={votingResult}
+                                  onPrint={() => handlePrint('voting-view')}
+                                  onExport={(format) => handleExportImage(format, 'voting-view')}
+                                  containerId="voting-view"
+                              />
+                              <div className="text-center">
+                                  <button onClick={handleSimulateVote} className="px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover">{t.simulateVote}</button>
+                              </div>
+                          </div>
 
-                         <div className="space-y-4">
-                            <WaterfallView 
-                                result={waterfallResult}
-                                onPrint={() => handlePrint('waterfall-view')}
-                                onExport={(format) => handleExportImage(format, 'waterfall-view')}
-                                containerId="waterfall-view"
-                                projectCurrency={projectCurrency}
-                            />
-                             <form onSubmit={handleSimulateWaterfall} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-                                <div>
-                                    <label htmlFor="exitProceeds" className="block text-sm font-medium text-secondary">{t.exitProceeds}</label>
-                                    <input type="number" id="exitProceeds" value={exitProceeds} onChange={e => setExitProceeds(e.target.value === '' ? '' : parseFloat(e.target.value))} className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md" placeholder="10000000" />
-                                </div>
-                                <div>
-                                    <label htmlFor="transactionCosts" className="block text-sm font-medium text-secondary">{t.transactionCosts}</label>
-                                    <input type="number" id="transactionCosts" value={transactionCosts} onChange={e => setTransactionCosts(e.target.value === '' ? '' : parseFloat(e.target.value))} className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md" placeholder="500000" />
-                                </div>
-                                <div className="sm:col-span-2 text-center">
-                                    <button type="submit" className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover">{t.simulateWaterfall}</button>
-                                </div>
-                            </form>
-                        </div>
-                      </>
-                    )}
-                </div>
-            </div>
-          </main>
+                          <div className="space-y-4">
+                              <WaterfallView 
+                                  result={waterfallResult}
+                                  onPrint={() => handlePrint('waterfall-view')}
+                                  onExport={(format) => handleExportImage(format, 'waterfall-view')}
+                                  containerId="waterfall-view"
+                              />
+                              <form onSubmit={handleSimulateWaterfall} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                                  <div>
+                                      <label htmlFor="exitProceeds" className="block text-sm font-medium text-secondary">{t.exitProceeds}</label>
+                                      <input type="number" id="exitProceeds" value={exitProceeds} onChange={e => setExitProceeds(e.target.value === '' ? '' : parseFloat(e.target.value))} className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md" />
+                                  </div>
+                                  <div>
+                                      <label htmlFor="transactionCosts" className="block text-sm font-medium text-secondary">{t.transactionCosts}</label>
+                                      <input type="number" id="transactionCosts" value={transactionCosts} onChange={e => setTransactionCosts(e.target.value === '' ? '' : parseFloat(e.target.value))} className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md" />
+                                  </div>
+                                  <div className="sm:col-span-2 text-center">
+                                      <button type="submit" className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover">{t.simulateWaterfall}</button>
+                                  </div>
+                              </form>
+                          </div>
+                        </>
+                      )}
+                  </div>
+              </div>
+            </main>
+          </ProjectProvider>
         )}
       </div>
       <Footer onOpenLegalModal={handleOpenLegalModal} />
 
       {isModalOpen && (
-        <TransactionFormModal
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
-            formType={currentFormType}
-            onSubmit={handleTransactionSubmit}
-            transactionToEdit={editingTransaction}
-            transactions={transactions}
-            stakeholders={stakeholders}
-            capTable={capTableResult}
-            projectCurrency={projectCurrency}
-        />
+        <ProjectProvider project={activeProject}>
+            <TransactionFormModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                formType={currentFormType}
+                onSubmit={handleTransactionSubmit}
+                transactionToEdit={editingTransaction}
+                capTable={capTableResult}
+            />
+        </ProjectProvider>
       )}
       <ConfirmDialog 
         isOpen={isConfirmOpen}

@@ -1,7 +1,7 @@
 
 
 import React, { useMemo } from 'react';
-import { TransactionType, Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, Stakeholder, ShareClass, DebtInstrumentTransaction, UpdateShareClassTransaction, CapTable, EqualizationPurchaseTransaction } from '../types';
+import { TransactionType, Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, UpdateShareClassTransaction, CapTable, EqualizationPurchaseTransaction, DebtInstrumentTransaction } from '../types';
 import CompanyForm from './forms/CompanyForm';
 import ConvertibleLoanForm from './forms/ConvertibleLoanForm';
 import FinancingRoundForm from './forms/FinancingRoundForm';
@@ -10,8 +10,9 @@ import DebtForm from './forms/DebtForm';
 import UpdateShareClassForm from './forms/UpdateShareClassForm';
 import EqualizationForm from './forms/EqualizationForm';
 import CloseIcon from '../styles/icons/CloseIcon';
-import { calculateCapTable, getShareClassesAsOf } from '../logic/calculations';
+import { calculateCapTable } from '../logic/calculations';
 import { useLocalization } from '../contexts/LocalizationContext';
+import { useProject } from '../contexts/ProjectContext';
 
 interface TransactionFormModalProps {
   isOpen: boolean;
@@ -19,10 +20,7 @@ interface TransactionFormModalProps {
   formType: TransactionType | null;
   onSubmit: (transaction: Transaction) => void;
   transactionToEdit?: Transaction | null;
-  transactions: Transaction[];
-  stakeholders: Stakeholder[];
   capTable: CapTable | null;
-  projectCurrency: string;
 }
 
 function TransactionFormModal({ 
@@ -31,24 +29,12 @@ function TransactionFormModal({
     formType, 
     onSubmit, 
     transactionToEdit,
-    transactions,
-    stakeholders,
     capTable,
-    projectCurrency
 }: TransactionFormModalProps) {
   const { t } = useLocalization();
+  const { transactions } = useProject();
 
   if (!isOpen || !formType) return null;
-
-  const allShareClasses = useMemo<ShareClass[]>(() => {
-    if (formType === TransactionType.UPDATE_SHARE_CLASS || formType === TransactionType.EQUALIZATION_PURCHASE) {
-        const asOfDate = new Date().toISOString().split('T')[0];
-        const shareClassMap = getShareClassesAsOf(transactions, asOfDate);
-        return Array.from(shareClassMap.values());
-    }
-    return [];
-  }, [formType, transactions]);
-
 
   const renderForm = () => {
     switch (formType) {
@@ -57,15 +43,12 @@ function TransactionFormModal({
                   onSubmit={onSubmit} 
                   onCancel={onClose} 
                   transactionToEdit={transactionToEdit as FoundingTransaction} 
-                  stakeholders={stakeholders}
                 />;
       case TransactionType.CONVERTIBLE_LOAN:
         return <ConvertibleLoanForm 
                   onSubmit={onSubmit} 
                   onCancel={onClose} 
                   transactionToEdit={transactionToEdit as ConvertibleLoanTransaction} 
-                  stakeholders={stakeholders}
-                  projectCurrency={projectCurrency}
                 />;
       case TransactionType.FINANCING_ROUND: {
         const activeTxs = transactions.filter(tx => tx.status === 'ACTIVE');
@@ -92,8 +75,6 @@ function TransactionFormModal({
                     transactionToEdit={transactionToEdit as FinancingRoundTransaction}
                     preRoundTotalShares={preRoundTotalShares}
                     convertibleLoans={convertibleLoans}
-                    stakeholders={stakeholders}
-                    projectCurrency={projectCurrency}
                 />;
       }
       case TransactionType.SHARE_TRANSFER: {
@@ -101,9 +82,7 @@ function TransactionFormModal({
                     onSubmit={onSubmit}
                     onCancel={onClose}
                     transactionToEdit={transactionToEdit as ShareTransferTransaction}
-                    stakeholders={stakeholders}
                     capTable={capTable}
-                    projectCurrency={projectCurrency}
                 />
       }
       case TransactionType.EQUALIZATION_PURCHASE:
@@ -111,25 +90,18 @@ function TransactionFormModal({
                     onSubmit={onSubmit}
                     onCancel={onClose}
                     transactionToEdit={transactionToEdit as EqualizationPurchaseTransaction}
-                    stakeholders={stakeholders}
-                    allTransactions={transactions}
-                    allShareClasses={allShareClasses}
-                    projectCurrency={projectCurrency}
                 />
       case TransactionType.DEBT_INSTRUMENT:
         return <DebtForm
                   onSubmit={onSubmit}
                   onCancel={onClose}
                   transactionToEdit={transactionToEdit as DebtInstrumentTransaction}
-                  projectCurrency={projectCurrency}
                />;
       case TransactionType.UPDATE_SHARE_CLASS: {
         return <UpdateShareClassForm
                     onSubmit={onSubmit}
                     onCancel={onClose}
                     transactionToEdit={transactionToEdit as UpdateShareClassTransaction}
-                    allShareClasses={allShareClasses}
-                    allTransactions={transactions}
                 />
       }
       default:

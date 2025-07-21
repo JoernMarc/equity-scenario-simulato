@@ -1,7 +1,7 @@
 
 
 import React, { useMemo } from 'react';
-import type { Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, ShareClass, DebtInstrumentTransaction, UpdateShareClassTransaction, Stakeholder, EqualizationPurchaseTransaction } from '../types';
+import type { Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, ShareClass, DebtInstrumentTransaction, UpdateShareClassTransaction, EqualizationPurchaseTransaction } from '../types';
 import { TransactionType, TransactionStatus, ConversionMechanism } from '../types';
 import type { Translations } from '../i18n';
 import PencilIcon from '../styles/icons/PencilIcon';
@@ -9,17 +9,14 @@ import TrashIcon from '../styles/icons/TrashIcon';
 import { getShareClassesAsOf } from '../logic/calculations';
 import { snakeToCamel } from '../logic/utils';
 import { useLocalization } from '../contexts/LocalizationContext';
+import { useProject } from '../contexts/ProjectContext';
 
 interface TransactionListProps {
-  transactions: Transaction[];
-  allTransactions: Transaction[]; // For looking up converted loans
-  stakeholders: Stakeholder[];
   onEdit: (transaction: Transaction) => void;
   onDelete: (transactionId: string) => void;
   isFoundingDeletable: boolean;
   searchQuery: string;
   simulationDate: string;
-  projectCurrency: string;
 }
 
 const getIsUsed = (tx: Transaction, simulationDate: string): boolean => {
@@ -95,20 +92,39 @@ const ShareClassDetails = ({ shareClass, translations }: { shareClass: ShareClas
 };
 
 
-function TransactionList({ transactions, allTransactions, stakeholders, onEdit, onDelete, isFoundingDeletable, searchQuery, simulationDate, projectCurrency }: TransactionListProps) {
+function TransactionList({ onEdit, onDelete, isFoundingDeletable, searchQuery, simulationDate }: TransactionListProps) {
   const { t: translations, locale } = useLocalization();
+  const { transactions, stakeholders, projectCurrency } = useProject();
+
+  const filteredTransactions = useMemo(() => {
+    if (!searchQuery) return transactions;
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    return transactions.filter(tx => {
+      const txString = JSON.stringify(tx).toLowerCase();
+      return txString.includes(lowerCaseQuery);
+    });
+  }, [searchQuery, transactions]);
 
   if (transactions.length === 0) {
     return (
       <div className="text-center py-10 px-4 bg-surface rounded-lg shadow-sm border border-subtle">
-        <p className="text-secondary">{searchQuery ? translations.noSearchResults : translations.noTransactions}</p>
+        <p className="text-secondary">{translations.noTransactions}</p>
       </div>
     );
   }
 
+  if (filteredTransactions.length === 0) {
+      return (
+        <div className="text-center py-10 px-4 bg-surface rounded-lg shadow-sm border border-subtle">
+            <p className="text-secondary">{translations.noSearchResults}</p>
+        </div>
+      );
+  }
+
+
   const allShareClassesAsOfNow = useMemo(() => {
-    return getShareClassesAsOf(allTransactions, new Date().toISOString().split('T')[0]);
-  }, [allTransactions]);
+    return getShareClassesAsOf(transactions, new Date().toISOString().split('T')[0]);
+  }, [transactions]);
 
   const renderTransactionDetails = (tx: Transaction) => {
     const isFounding = tx.type === TransactionType.FOUNDING;
@@ -249,7 +265,7 @@ function TransactionList({ transactions, allTransactions, stakeholders, onEdit, 
         const postMoneyValuation = roundTx.preMoneyValuation + totalInvestment;
         
         const convertedLoans = (roundTx.convertsLoanIds || [])
-          .map(id => allTransactions.find(t => t.id === id) as ConvertibleLoanTransaction)
+          .map(id => transactions.find(t => t.id === id) as ConvertibleLoanTransaction)
           .filter(Boolean);
 
         return (
@@ -312,7 +328,7 @@ function TransactionList({ transactions, allTransactions, stakeholders, onEdit, 
       case TransactionType.EQUALIZATION_PURCHASE: {
         const eqTx = tx as EqualizationPurchaseTransaction;
         const shareClass = allShareClassesAsOfNow.get(eqTx.shareClassId);
-        const referenceTx = allTransactions.find(t => t.id === eqTx.referenceTransactionId);
+        const referenceTx = transactions.find(t => t.id === eqTx.referenceTransactionId);
         let referenceTxName = 'N/A';
         if (referenceTx) {
             if (referenceTx.type === TransactionType.FOUNDING) {
@@ -355,7 +371,7 @@ function TransactionList({ transactions, allTransactions, stakeholders, onEdit, 
       }
       case TransactionType.UPDATE_SHARE_CLASS: {
           const updateTx = tx as UpdateShareClassTransaction;
-          const txsBeforeThisOne = allTransactions.filter(t => t.id !== tx.id);
+          const txsBeforeThisOne = transactions.filter(t => t.id !== tx.id);
           const shareClassesBeforeUpdate = getShareClassesAsOf(txsBeforeThisOne, tx.date);
           const oldShareClassState = shareClassesBeforeUpdate.get(updateTx.shareClassIdToUpdate);
           const newShareClassState = allShareClassesAsOfNow.get(updateTx.shareClassIdToUpdate);
@@ -391,7 +407,7 @@ function TransactionList({ transactions, allTransactions, stakeholders, onEdit, 
     }
   };
 
-  return <div className="space-y-4">{transactions.map(renderTransactionDetails)}</div>;
+  return <div className="space-y-4">{filteredTransactions.map(renderTransactionDetails)}</div>;
 };
 
 export default TransactionList;

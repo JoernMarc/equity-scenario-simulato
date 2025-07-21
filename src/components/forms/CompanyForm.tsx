@@ -1,18 +1,18 @@
 
 
 import React, { useState, useMemo } from 'react';
-import type { FoundingTransaction, ShareClass, Shareholding, Stakeholder, VestingSchedule } from '../../types';
+import type { FoundingTransaction, ShareClass, Shareholding, VestingSchedule } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
 import { LEGAL_FORMS, LEGAL_FORM_REQUIREMENTS, COMMON_CURRENCIES } from '../../constants';
 import HelpTooltip from '../HelpTooltip';
 import CurrencyInput from '../common/CurrencyInput';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { useProject } from '../../contexts/ProjectContext';
 
 interface CompanyFormProps {
   onSubmit: (transaction: FoundingTransaction) => void;
   onCancel: () => void;
   transactionToEdit?: FoundingTransaction;
-  stakeholders: Stakeholder[];
 }
 
 const createDefaultShareClass = (): ShareClass => ({
@@ -35,8 +35,9 @@ const createDefaultVestingSchedule = (): VestingSchedule => ({
 });
 
 
-function CompanyForm({ onSubmit, onCancel, transactionToEdit, stakeholders }: CompanyFormProps) {
+function CompanyForm({ onSubmit, onCancel, transactionToEdit }: CompanyFormProps) {
   const { t: translations, locale } = useLocalization();
+  const { stakeholders } = useProject();
   const isEditing = !!transactionToEdit;
   const [date, setDate] = useState(transactionToEdit?.date || new Date().toISOString().split('T')[0]);
   const [companyName, setCompanyName] = useState(transactionToEdit?.companyName || '');

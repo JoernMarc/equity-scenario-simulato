@@ -1,7 +1,7 @@
 
 
 import React, { useState, useMemo } from 'react';
-import type { FinancingRoundTransaction, Shareholding, ShareClass, ConvertibleLoanTransaction, LiquidationPreferenceType, AntiDilutionProtection, Stakeholder } from '../../types';
+import type { FinancingRoundTransaction, Shareholding, ShareClass, ConvertibleLoanTransaction, LiquidationPreferenceType, AntiDilutionProtection } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
 import type { Translations } from '../../i18n';
 import { ANTI_DILUTION_TYPES, LIQUIDATION_PREFERENCE_TYPES } from '../../constants';
@@ -9,6 +9,7 @@ import HelpTooltip from '../HelpTooltip';
 import { snakeToCamel } from '../../logic/utils';
 import CurrencyInput from '../common/CurrencyInput';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { useProject } from '../../contexts/ProjectContext';
 
 interface NewInvestorInput {
     id: string;
@@ -22,8 +23,6 @@ interface FinancingRoundFormProps {
   transactionToEdit?: FinancingRoundTransaction;
   preRoundTotalShares: number;
   convertibleLoans: ConvertibleLoanTransaction[];
-  stakeholders: Stakeholder[];
-  projectCurrency: string;
 }
 
 const createDefaultShareClass = (): ShareClass => ({
@@ -40,8 +39,9 @@ const createDefaultShareClass = (): ShareClass => ({
 const baseInputClasses = "mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-interactive focus:border-interactive";
 
 
-function FinancingRoundForm({ onSubmit, onCancel, transactionToEdit, preRoundTotalShares, convertibleLoans, stakeholders, projectCurrency }: FinancingRoundFormProps) {
+function FinancingRoundForm({ onSubmit, onCancel, transactionToEdit, preRoundTotalShares, convertibleLoans }: FinancingRoundFormProps) {
   const { t: translations, locale } = useLocalization();
+  const { stakeholders, projectCurrency } = useProject();
   const isEditing = !!transactionToEdit;
   
   // Basic Info

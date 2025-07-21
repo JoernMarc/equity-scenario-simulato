@@ -1,26 +1,26 @@
 
 
 import React, { useState } from 'react';
-import type { ConvertibleLoanTransaction, Stakeholder } from '../../types';
+import type { ConvertibleLoanTransaction } from '../../types';
 import { TransactionType, TransactionStatus, ConversionMechanism } from '../../types';
 import type { Translations } from '../../i18n';
 import HelpTooltip from '../HelpTooltip';
 import { snakeToCamel } from '../../logic/utils';
 import CurrencyInput from '../common/CurrencyInput';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { useProject } from '../../contexts/ProjectContext';
 
 interface ConvertibleLoanFormProps {
   onSubmit: (transaction: ConvertibleLoanTransaction) => void;
   onCancel: () => void;
   transactionToEdit?: ConvertibleLoanTransaction;
-  stakeholders: Stakeholder[];
-  projectCurrency: string;
 }
 
 const seniorityLevels: ConvertibleLoanTransaction['seniority'][] = ['SENIOR_UNSECURED', 'SUBORDINATED'];
 
-function ConvertibleLoanForm({ onSubmit, onCancel, transactionToEdit, stakeholders, projectCurrency }: ConvertibleLoanFormProps) {
+function ConvertibleLoanForm({ onSubmit, onCancel, transactionToEdit }: ConvertibleLoanFormProps) {
   const { t, locale } = useLocalization();
+  const { stakeholders, projectCurrency } = useProject();
   const isEditing = !!transactionToEdit;
 
   // Basic info

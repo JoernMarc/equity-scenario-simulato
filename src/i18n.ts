@@ -1,4 +1,5 @@
 
+
 export const translations = {
   en: {
     appTitle: "Equity Scenario Simulator",

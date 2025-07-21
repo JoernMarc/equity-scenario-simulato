@@ -8,20 +8,21 @@ import { snakeToCamel } from '../../logic/utils';
 import HelpTooltip from '../HelpTooltip';
 import CurrencyInput from '../common/CurrencyInput';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { useProject } from '../../contexts/ProjectContext';
 
 interface DebtFormProps {
   onSubmit: (transaction: DebtInstrumentTransaction) => void;
   onCancel: () => void;
   transactionToEdit?: DebtInstrumentTransaction;
-  projectCurrency: string;
 }
 
 const baseInputClasses = "mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-interactive focus:border-interactive";
 
 const seniorityLevels: DebtInstrumentTransaction['seniority'][] = ['SENIOR_SECURED', 'SENIOR_UNSECURED', 'SUBORDINATED'];
 
-function DebtForm({ onSubmit, onCancel, transactionToEdit, projectCurrency }: DebtFormProps) {
+function DebtForm({ onSubmit, onCancel, transactionToEdit }: DebtFormProps) {
   const { t, locale } = useLocalization();
+  const { projectCurrency } = useProject();
   const isEditing = !!transactionToEdit;
 
   const [date, setDate] = useState(transactionToEdit?.date || new Date().toISOString().split('T')[0]);
