@@ -1,6 +1,4 @@
 
-import React from 'react';
-
 function PencilIcon({ className = 'w-6 h-6' }: { className?: string }) {
   return (
     <svg 

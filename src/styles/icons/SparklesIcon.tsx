@@ -1,6 +1,4 @@
 
-import React from 'react';
-
 function SparklesIcon({ className = 'w-6 h-6' }: { className?: string }) {
   return (
     <svg 

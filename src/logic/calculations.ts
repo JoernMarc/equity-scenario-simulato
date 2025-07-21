@@ -1,5 +1,3 @@
-
-
 import type {
   Transaction,
   ShareClass,

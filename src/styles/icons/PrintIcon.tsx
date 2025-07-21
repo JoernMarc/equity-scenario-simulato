@@ -1,6 +1,4 @@
 
-import React from 'react';
-
 function PrintIcon({ className = 'w-6 h-6' }: { className?: string }) {
   return (
     <svg 
