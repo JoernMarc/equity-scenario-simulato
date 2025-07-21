@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { useLocalization } from '../contexts/LocalizationContext';
 
 interface ConfirmDialogProps {

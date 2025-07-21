@@ -1,6 +1,6 @@
 
 
-import React, { useMemo } from 'react';
+
 import { TransactionType, Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, UpdateShareClassTransaction, CapTable, EqualizationPurchaseTransaction, DebtInstrumentTransaction } from '../types';
 import CompanyForm from './forms/CompanyForm';
 import ConvertibleLoanForm from './forms/ConvertibleLoanForm';
@@ -11,7 +11,6 @@ import UpdateShareClassForm from './forms/UpdateShareClassForm';
 import EqualizationForm from './forms/EqualizationForm';
 import CloseIcon from '../styles/icons/CloseIcon';
 import { calculateCapTable } from '../logic/calculations';
-import { useLocalization } from '../contexts/LocalizationContext';
 import { useProject } from '../contexts/ProjectContext';
 
 interface TransactionFormModalProps {
@@ -31,7 +30,6 @@ function TransactionFormModal({
     transactionToEdit,
     capTable,
 }: TransactionFormModalProps) {
-  const { t } = useLocalization();
   const { transactions } = useProject();
 
   if (!isOpen || !formType) return null;

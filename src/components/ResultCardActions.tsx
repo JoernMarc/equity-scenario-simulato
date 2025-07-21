@@ -1,6 +1,7 @@
 
 
-import React, { useState, useRef, useEffect } from 'react';
+
+import { useState, useRef, useEffect } from 'react';
 import PrintIcon from '../styles/icons/PrintIcon';
 import DownloadIcon from '../styles/icons/DownloadIcon';
 import { useLocalization } from '../contexts/LocalizationContext';

@@ -1,5 +1,4 @@
 
-import React from 'react';
 import type { LegalTab } from '../types';
 import { useLocalization } from '../contexts/LocalizationContext';
 

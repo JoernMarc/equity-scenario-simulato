@@ -1,6 +1,7 @@
 
 
-import React, { useState } from 'react';
+
+import { useState } from 'react';
 import type { SampleScenario } from '../types';
 import type { Translations } from '../i18n';
 import ChevronDownIcon from '../styles/icons/ChevronDownIcon';

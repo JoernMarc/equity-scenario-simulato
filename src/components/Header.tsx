@@ -1,6 +1,5 @@
 
 
-import React from 'react';
 import type { FontSize, Theme } from '../types';
 import ContrastIcon from '../styles/icons/ContrastIcon';
 import TextSizeIcon from '../styles/icons/TextSizeIcon';

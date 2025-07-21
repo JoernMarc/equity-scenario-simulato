@@ -1,5 +1,4 @@
 
-import React from 'react';
 import type { CapTable } from '../types';
 import ResultCardActions from './ResultCardActions';
 import { useLocalization } from '../contexts/LocalizationContext';

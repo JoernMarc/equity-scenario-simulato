@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 function HelpIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
