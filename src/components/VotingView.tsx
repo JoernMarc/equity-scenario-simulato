@@ -1,5 +1,5 @@
 
-import React from 'react';
+
 import type { VotingResult } from '../types';
 import ResultCardActions from './ResultCardActions';
 import { useLocalization } from '../contexts/LocalizationContext';

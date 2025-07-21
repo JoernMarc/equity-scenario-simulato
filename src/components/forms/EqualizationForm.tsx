@@ -1,9 +1,9 @@
 
 
+
 import React, { useState, useMemo } from 'react';
 import type { EqualizationPurchaseTransaction } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
-import type { Translations } from '../../i18n';
 import HelpTooltip from '../HelpTooltip';
 import CurrencyInput from '../common/CurrencyInput';
 import { useLocalization } from '../../contexts/LocalizationContext';
@@ -19,7 +19,7 @@ const baseInputClasses = "mt-1 block w-full px-3 py-2 bg-surface border border-s
 
 
 function EqualizationForm({ onSubmit, onCancel, transactionToEdit }: EqualizationFormProps) {
-  const { t, locale } = useLocalization();
+  const { t } = useLocalization();
   const { stakeholders, transactions: allTransactions, allShareClasses: allShareClassesMap, projectCurrency } = useProject();
   const allShareClasses = useMemo(() => Array.from(allShareClassesMap.values()), [allShareClassesMap]);
   const isEditing = !!transactionToEdit;

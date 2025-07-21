@@ -1,5 +1,6 @@
 
 
+
 import React, { useState } from 'react';
 import type { DebtInstrumentTransaction } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
@@ -21,7 +22,7 @@ const baseInputClasses = "mt-1 block w-full px-3 py-2 bg-surface border border-s
 const seniorityLevels: DebtInstrumentTransaction['seniority'][] = ['SENIOR_SECURED', 'SENIOR_UNSECURED', 'SUBORDINATED'];
 
 function DebtForm({ onSubmit, onCancel, transactionToEdit }: DebtFormProps) {
-  const { t, locale } = useLocalization();
+  const { t } = useLocalization();
   const { projectCurrency } = useProject();
   const isEditing = !!transactionToEdit;
 

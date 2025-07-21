@@ -1,5 +1,6 @@
 
 
+
 import React, { useState } from 'react';
 import type { ConvertibleLoanTransaction } from '../../types';
 import { TransactionType, TransactionStatus, ConversionMechanism } from '../../types';
@@ -19,7 +20,7 @@ interface ConvertibleLoanFormProps {
 const seniorityLevels: ConvertibleLoanTransaction['seniority'][] = ['SENIOR_UNSECURED', 'SUBORDINATED'];
 
 function ConvertibleLoanForm({ onSubmit, onCancel, transactionToEdit }: ConvertibleLoanFormProps) {
-  const { t, locale } = useLocalization();
+  const { t } = useLocalization();
   const { stakeholders, projectCurrency } = useProject();
   const isEditing = !!transactionToEdit;
 

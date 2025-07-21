@@ -1,6 +1,5 @@
 
 
-import React from 'react';
 
 function ChevronRightIcon({ className = 'w-6 h-6' }: { className?: string }) {
   return (

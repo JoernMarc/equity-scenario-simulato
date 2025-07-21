@@ -1,7 +1,7 @@
 
 
 
-import React from 'react';
+
 import { Handle, Position } from 'reactflow';
 import type { NodeProps } from 'reactflow';
 import ChevronRightIcon from '../styles/icons/ChevronRightIcon';

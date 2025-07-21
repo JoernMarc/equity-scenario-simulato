@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useMemo, useEffect } from 'react';
 import type { ShareTransferTransaction, CapTable } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
@@ -19,7 +20,7 @@ const baseInputClasses = "mt-1 block w-full px-3 py-2 bg-surface border border-s
 
 
 function ShareTransferForm({ onSubmit, onCancel, transactionToEdit, capTable }: ShareTransferFormProps) {
-  const { t, locale } = useLocalization();
+  const { t } = useLocalization();
   const { stakeholders, projectCurrency } = useProject();
   const isEditing = !!transactionToEdit;
 
