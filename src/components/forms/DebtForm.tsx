@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import type { DebtInstrumentTransaction } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
@@ -65,7 +66,10 @@ function DebtForm({ onSubmit, onCancel, transactionToEdit }: DebtFormProps) {
                     <input type="text" id="lenderName" value={lenderName} onChange={e => setLenderName(e.target.value)} required className={baseInputClasses}/>
                 </div>
                 <div>
-                    <label htmlFor="date" className="block text-sm font-medium text-secondary">{t.date}</label>
+                    <label htmlFor="date" className="flex items-center text-sm font-medium text-secondary">
+                        {t.date}
+                        <HelpTooltip text={t.help.date} />
+                    </label>
                     <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} required className={baseInputClasses}/>
                 </div>
             </div>
@@ -75,7 +79,10 @@ function DebtForm({ onSubmit, onCancel, transactionToEdit }: DebtFormProps) {
                     <CurrencyInput id="amount" value={amount} onChange={setAmount} required currency={projectCurrency} />
                 </div>
                 <div>
-                    <label htmlFor="interestRate" className="block text-sm font-medium text-secondary">{t.interestRate}</label>
+                    <label htmlFor="interestRate" className="flex items-center text-sm font-medium text-secondary">
+                        {t.interestRate}
+                        <HelpTooltip text={t.help.interestOnDebt} />
+                    </label>
                     <div className="relative mt-1">
                         <input type="number" id="interestRate" min="0" step="any" value={interestRate} onChange={e => setInterestRate(e.target.value === '' ? '' : parseFloat(e.target.value))} required className={`${baseInputClasses} text-right pr-6`} />
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
@@ -84,7 +91,10 @@ function DebtForm({ onSubmit, onCancel, transactionToEdit }: DebtFormProps) {
                     </div>
                 </div>
                 <div>
-                    <label htmlFor="seniority" className="block text-sm font-medium text-secondary">{t.seniority}</label>
+                    <label htmlFor="seniority" className="flex items-center text-sm font-medium text-secondary">
+                        {t.seniority}
+                        <HelpTooltip text={t.help.debtSeniority} />
+                    </label>
                     <select id="seniority" value={seniority} onChange={e => setSeniority(e.target.value as DebtInstrumentTransaction['seniority'])} required className={baseInputClasses}>
                         {seniorityLevels.map(level => {
                              const key = snakeToCamel(level) as keyof Translations;
@@ -108,11 +118,17 @@ function DebtForm({ onSubmit, onCancel, transactionToEdit }: DebtFormProps) {
               </select>
             </div>
             <div>
-              <label htmlFor="validFrom" className="block text-sm font-medium text-secondary">{t.validFrom}</label>
+              <label htmlFor="validFrom" className="flex items-center text-sm font-medium text-secondary">
+                  {t.validFrom}
+                  <HelpTooltip text={t.help.validFrom} />
+              </label>
               <input type="date" id="validFrom" value={validFrom} onChange={e => setValidFrom(e.target.value)} required className={baseInputClasses}/>
             </div>
             <div>
-              <label htmlFor="validTo" className="block text-sm font-medium text-secondary">{t.validTo} <span className="text-subtle">({t.optional})</span></label>
+              <label htmlFor="validTo" className="flex items-center text-sm font-medium text-secondary">
+                  {t.validTo} <span className="text-subtle">({t.optional})</span>
+                  <HelpTooltip text={t.help.validTo} />
+              </label>
               <input type="date" id="validTo" value={validTo} onChange={e => setValidTo(e.target.value)} className={baseInputClasses}/>
             </div>
         </div>

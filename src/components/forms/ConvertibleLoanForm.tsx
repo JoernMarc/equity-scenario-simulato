@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import type { ConvertibleLoanTransaction } from '../../types';
 import { TransactionType, TransactionStatus, ConversionMechanism } from '../../types';
@@ -97,7 +98,10 @@ function ConvertibleLoanForm({ onSubmit, onCancel, transactionToEdit }: Converti
           <input type="text" id="investorName" value={investorName} onChange={e => setInvestorName(e.target.value)} required className={baseInputClasses} list="stakeholders-list" />
         </div>
         <div>
-          <label htmlFor="date" className="block text-sm font-medium text-secondary">{t.date}</label>
+          <label htmlFor="date" className="flex items-center text-sm font-medium text-secondary">
+              {t.date}
+              <HelpTooltip text={t.help.date} />
+          </label>
           <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} required className={baseInputClasses}/>
         </div>
         <div>
@@ -109,7 +113,10 @@ function ConvertibleLoanForm({ onSubmit, onCancel, transactionToEdit }: Converti
           <input type="number" id="interestRate" min="0" value={interestRate} onChange={e => setInterestRate(e.target.value === '' ? '' : parseFloat(e.target.value))} className={`${baseInputClasses} text-right`}/>
         </div>
          <div>
-            <label htmlFor="seniority" className="block text-sm font-medium text-secondary">{t.seniority}</label>
+            <label htmlFor="seniority" className="flex items-center text-sm font-medium text-secondary">
+              {t.seniority}
+              <HelpTooltip text={t.help.seniority} align="right" />
+            </label>
             <select id="seniority" value={seniority} onChange={e => setSeniority(e.target.value as ConvertibleLoanTransaction['seniority'])} required className={baseInputClasses}>
                 {seniorityLevels.map(level => {
                     const key = snakeToCamel(level) as keyof Translations;
@@ -190,11 +197,17 @@ function ConvertibleLoanForm({ onSubmit, onCancel, transactionToEdit }: Converti
               </select>
             </div>
             <div>
-              <label htmlFor="validFrom" className="block text-sm font-medium text-secondary">{t.validFrom}</label>
+              <label htmlFor="validFrom" className="flex items-center text-sm font-medium text-secondary">
+                  {t.validFrom}
+                  <HelpTooltip text={t.help.validFrom} />
+              </label>
               <input type="date" id="validFrom" value={validFrom} onChange={e => setValidFrom(e.target.value)} required className={baseInputClasses}/>
             </div>
             <div>
-              <label htmlFor="validTo" className="block text-sm font-medium text-secondary">{t.validTo} <span className="text-subtle">({t.optional})</span></label>
+              <label htmlFor="validTo" className="flex items-center text-sm font-medium text-secondary">
+                {t.validTo} <span className="text-subtle">({t.optional})</span>
+                <HelpTooltip text={t.help.validTo} />
+              </label>
               <input type="date" id="validTo" value={validTo} onChange={e => setValidTo(e.target.value)} className={baseInputClasses}/>
             </div>
         </div>

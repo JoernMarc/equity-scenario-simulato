@@ -1,5 +1,6 @@
 
 
+
 function HelpIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 20 20" fill="currentColor">
@@ -8,18 +9,31 @@ function HelpIcon({ className = 'w-4 h-4' }: { className?: string }) {
   );
 }
 
-function HelpTooltip({ text }: { text: string }) {
+const parseText = (text: string) => {
+    return text.split(/(\*.*?\*)/g).map((part, index) => {
+        if (part.startsWith('*') && part.endsWith('*')) {
+            return <i key={index}>{part.slice(1, -1)}</i>;
+        }
+        return part;
+    });
+};
+
+
+function HelpTooltip({ text, align = 'center' }: { text: string, align?: 'center' | 'right' }) {
     if (!text) return null;
     
+    const alignmentClasses = align === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2';
+    const arrowAlignmentClasses = align === 'right' ? 'right-4' : 'left-1/2 -translate-x-1/2';
+
   return (
     <div className="group relative inline-flex items-center justify-center ml-1.5">
       <button type="button" className="text-subtle hover:text-interactive focus:text-interactive focus:outline-none cursor-help">
         <HelpIcon />
       </button>
-      <div className="absolute top-full mt-2 w-64 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 pointer-events-none z-10 transform -translate-x-1/2 left-1/2">
-        {text}
-        <svg className="absolute text-slate-800 h-2 w-full left-0 bottom-full transform rotate-180" x="0px" y="0px" viewBox="0 0 255 255" xmlSpace="preserve">
-            <polygon className="fill-current" points="0,0 127.5,127.5 255,0"/>
+      <div className={`absolute top-full mt-2 w-64 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 pointer-events-none z-10 transform ${alignmentClasses}`}>
+        {parseText(text)}
+        <svg className={`absolute text-slate-800 h-2 w-auto bottom-full transform rotate-180 ${arrowAlignmentClasses}`} viewBox="0 0 255 255" xmlSpace="preserve">
+            <polygon className="fill-current" points="0,255 127.5,0 255,255"/>
         </svg>
       </div>
     </div>

@@ -10,13 +10,13 @@ The application uses **Tailwind CSS** for utility-first styling, enhanced by a c
 
 ## 2. Theming System
 
-The core of the application's visual appearance is controlled by a theming system defined in `index.html`. This allows for global style changes (e.g., light mode, dark mode, high-contrast mode) without altering component-level class names.
+The core of the application's visual appearance is controlled by a theming system. This allows for global style changes (e.g., light mode, dark mode, high-contrast mode) without altering component-level class names.
 
 ### 2.1. Core Principles
 
-- **CSS Variables:** All colors are defined as CSS variables (e.g., `--color-text-primary`).
-- **RGB Channels:** Colors are defined as RGB channels (`R G B`) rather than hex codes. This allows for easy opacity modification using Tailwind's slash notation (e.g., `bg-theme-interactive/50`).
-- **Theme-Aware Utilities:** Components **must** use custom theme-aware utility classes (e.g., `.bg-theme-surface`) instead of hard-coded Tailwind colors (e.g., `.bg-white`). This is the most critical rule for ensuring theme compatibility.
+- **CSS Variables:** All colors are defined as CSS variables (e.g., `--color-text-primary`) in `src/styles/index.css`.
+- **RGB Channels:** Colors are defined as RGB channels (`R G B`) rather than hex codes. This allows for easy opacity modification using Tailwind's slash notation (e.g., `bg-interactive/50`).
+- **Semantic Naming:** Components **must** use semantic utility classes (e.g., `bg-interactive`) instead of hard-coded Tailwind colors (e.g., `bg-blue-600`). This is the most critical rule for ensuring theme compatibility.
 
 ### 2.2. Available Themes
 
@@ -30,7 +30,7 @@ The application supports three themes, which are applied by adding a class to th
 
 ### 2.3. Key CSS Variables
 
-These variables are defined in the `:root` and theme-specific blocks in `index.html`.
+These variables are defined in the `:root` and theme-specific blocks in `src/styles/index.css`.
 
 - **Text Colors:**
   - `--color-text-primary`: Main text color for headings and important content.
@@ -61,15 +61,41 @@ These variables are defined in the `:root` and theme-specific blocks in `index.h
 
 ---
 
-## 3. Usage and Utility Classes
+## 3. Usage and Tailwind Configuration
 
-To apply themes correctly, use the provided utility classes in your components. These are defined in `index.html` and map directly to the CSS variables.
+To apply themes correctly, use the semantic color names defined in `tailwind.config.js`. These custom names are mapped to the CSS variables from `src/styles/index.css`.
 
-**Example: Creating a Themed Button**
+**Do not use hard-coded Tailwind colors like `bg-blue-600` or `text-gray-500`.** Instead, use the semantic names like `bg-interactive` or `text-secondary`.
+
+### 3.1. How it Works
+
+Our `tailwind.config.js` maps semantic color names to our CSS variables:
+
+```js
+// tailwind.config.js (excerpt)
+export default {
+  theme: {
+    extend: {
+      colors: {
+        // ...
+        interactive: {
+            DEFAULT: 'rgb(var(--color-interactive) / <alpha-value>)',
+            hover: 'rgb(var(--color-interactive-hover) / <alpha-value>)',
+        },
+        // ...
+      },
+    },
+  },
+};
+```
+
+This allows you to use `bg-interactive`, `text-interactive`, `border-interactive`, and `hover:bg-interactive-hover` in your components. Tailwind will automatically apply the correct color based on the active theme.
+
+### 3.2. Example: Creating a Themed Button
 
 ```jsx
-// CORRECT: Uses theme-aware utility classes
-<button className="px-4 py-2 bg-theme-interactive text-theme-on-interactive rounded-md hover:bg-theme-interactive-hover">
+// CORRECT: Uses semantic utility classes defined in tailwind.config.js
+<button className="px-4 py-2 bg-interactive text-on-interactive rounded-md hover:bg-interactive-hover">
   Save
 </button>
 
@@ -79,13 +105,15 @@ To apply themes correctly, use the provided utility classes in your components. 
 </button>
 ```
 
-**Commonly Used Utility Classes:**
+### 3.3. Commonly Used Semantic Classes
 
-- **Backgrounds:** `bg-theme-background`, `bg-theme-surface`, `bg-theme-subtle`
-- **Text:** `text-theme-primary`, `text-theme-secondary`, `text-theme-subtle`, `text-theme-on-interactive`
-- **Interactivity:** `bg-theme-interactive`, `hover:bg-theme-interactive-hover`, `text-theme-interactive`, `border-theme-interactive`, `ring-theme-interactive`
-- **Borders:** `border-theme-strong`, `border-theme-subtle`
-- **Semantic Backgrounds/Text:** `bg-theme-danger-subtle-bg`, `text-theme-danger-subtle-text`
+Refer to `tailwind.config.js` for the full list.
+
+- **Backgrounds:** `bg-background`, `bg-surface`, `bg-background-subtle`
+- **Text:** `text-primary`, `text-secondary`, `text-subtle`, `text-on-interactive`
+- **Interactivity:** `bg-interactive`, `hover:bg-interactive-hover`, `text-interactive`, `border-interactive`, `ring-interactive`
+- **Borders:** `border-strong`, `border-subtle`
+- **Semantic States:** `bg-danger-subtle-bg`, `text-danger-subtle-text`, `bg-success`
 
 ---
 
@@ -93,11 +121,11 @@ To apply themes correctly, use the provided utility classes in your components. 
 
 - **Font Sizes:** The app supports dynamic font sizing via classes on the `<body>` (`font-size-sm`, `font-size-base`, etc.). Use relative units (`rem`, `em`) where possible.
 - **Contrast:** Always use the theme color variables, as the High Contrast theme is specifically designed to meet WCAG AA/AAA contrast ratios.
-- **Focus Management:** Ensure all interactive elements have clear focus states. Use `focus:ring-2 focus:ring-offset-2 ring-theme-interactive`. For modals and dialogs, ensure focus is trapped and returned to the trigger element on close.
+- **Focus Management:** Ensure all interactive elements have clear focus states. Use `focus:ring-2 focus:ring-offset-2 ring-interactive`. For modals and dialogs, ensure focus is trapped and returned to the trigger element on close.
 - **ARIA Roles:** Use appropriate ARIA attributes (`aria-label`, `aria-expanded`, `role="dialog"`, etc.) to provide context to screen readers.
 
 ---
 
 ## 5. Icons
 
-Icons are implemented as individual React components in `components/icons/`. They are SVGs that accept a `className` prop, allowing their size and color to be controlled via Tailwind utilities (e.g., `<PlusIcon className="w-5 h-5 text-current" />`).
+Icons are implemented as individual React components in `src/styles/icons/`. They are SVGs that accept a `className` prop, allowing their size and color to be controlled via Tailwind utilities (e.g., `<PlusIcon className="w-5 h-5 text-current" />`).

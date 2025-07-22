@@ -1,9 +1,5 @@
 
-
-
-
-import { Handle, Position } from 'reactflow';
-import type { NodeProps } from 'reactflow';
+import { Handle, Position, type NodeProps } from 'reactflow';
 import ChevronRightIcon from '../styles/icons/ChevronRightIcon';
 
 interface CustomNodeData {

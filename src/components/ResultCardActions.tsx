@@ -1,6 +1,5 @@
 
 
-
 import { useState, useRef, useEffect } from 'react';
 import PrintIcon from '../styles/icons/PrintIcon';
 import DownloadIcon from '../styles/icons/DownloadIcon';
@@ -16,7 +15,7 @@ function ResultCardActions({ onPrint, onExport }: ResultCardActionsProps) {
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
-  const buttonClasses = "p-2 rounded-md transition-colors text-secondary hover:bg-background-subtle focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive";
+  const buttonClasses = "p-2 rounded-md transition-colors text-secondary hover:bg-background-subtle focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive no-print";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -34,7 +33,7 @@ function ResultCardActions({ onPrint, onExport }: ResultCardActionsProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 no-print">
       <button onClick={onPrint} className={buttonClasses} title={translations.print}>
         <PrintIcon className="w-5 h-5" />
       </button>

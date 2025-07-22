@@ -1,7 +1,6 @@
 
 
-
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { Transaction, FoundingTransaction, ConvertibleLoanTransaction, FinancingRoundTransaction, ShareTransferTransaction, ShareClass, DebtInstrumentTransaction, UpdateShareClassTransaction, EqualizationPurchaseTransaction } from '../types';
 import { TransactionType, TransactionStatus, ConversionMechanism } from '../types';
 import type { Translations } from '../i18n';
@@ -43,7 +42,15 @@ const getIsUsed = (tx: Transaction, simulationDate: string): boolean => {
     return true;
 };
 
-function TransactionCard({ title, date, locale, actions, children }: { title: string; date: string; locale: string; actions?: React.ReactNode; children: React.ReactNode }) {
+interface TransactionCardProps {
+  title: string;
+  date: string;
+  locale: string;
+  actions?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const TransactionCard: React.FC<TransactionCardProps> = ({ title, date, locale, actions, children }) => {
   return (
     <div className="bg-surface p-4 rounded-lg shadow-sm border border-subtle">
       <div className="flex justify-between items-start mb-3">
@@ -65,9 +72,9 @@ const DetailItem = ({ label, value, isNumeric = false, unit, isCurrency=false, l
     }
 
     return (
-        <div className="grid grid-cols-3 gap-2">
-            <dt className="font-semibold text-secondary col-span-1">{label}</dt>
-            <dd className={`text-primary col-span-2 ${isNumeric ? 'text-right font-mono' : ''}`}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-2 items-baseline">
+            <dt className="font-semibold text-secondary sm:col-span-1">{label}</dt>
+            <dd className={`text-primary sm:col-span-2 break-words ${isNumeric ? 'text-left sm:text-right font-mono' : 'text-left'}`}>
                  {displayValue} {unit && <span className="text-secondary ml-1">{unit}</span>}
             </dd>
         </div>
@@ -81,13 +88,22 @@ const ShareClassDetails = ({ shareClass, translations }: { shareClass: ShareClas
 
     const antiDilutionTypeKey = snakeToCamel(shareClass.antiDilutionProtection) as keyof Translations;
     const antiDilutionType = (translations[antiDilutionTypeKey] as string) || shareClass.antiDilutionProtection;
+    
+    const capText = shareClass.liquidationPreferenceType === 'CAPPED_PARTICIPATING' && shareClass.participationCapFactor
+        ? ` (${shareClass.participationCapFactor}x Cap)`
+        : '';
+
+    const liquidationPreferenceValue = `${shareClass.liquidationPreferenceRank} / ${shareClass.liquidationPreferenceFactor}x / ${liqPrefType}${capText}`;
+    
+    const provisions = shareClass.protectiveProvisions?.join(', ');
 
     return (
         <div className="p-3 bg-background rounded-md border border-subtle mt-2 space-y-2">
             <h5 className="font-bold text-primary">{shareClass.name}</h5>
-             <DetailItem label={translations.liquidationPreference} value={`${shareClass.liquidationPreferenceRank} / ${shareClass.liquidationPreferenceFactor}x / ${liqPrefType} ${shareClass.liquidationPreferenceType === 'CAPPED_PARTICIPATING' ? `(${shareClass.participationCapFactor}x Cap)` : ''}`} />
+             <DetailItem label={translations.liquidationPreference} value={liquidationPreferenceValue} />
              <DetailItem label={translations.antiDilutionProtection} value={antiDilutionType} />
-             <DetailItem label={translations.votesPerShare} value={shareClass.votesPerShare} />
+             <DetailItem label={translations.votesPerShare} value={shareClass.votesPerShare} isNumeric />
+             {provisions && <DetailItem label={translations.protectiveProvisions} value={provisions} />}
         </div>
     );
 };
@@ -311,6 +327,8 @@ function TransactionList({ onEdit, onDelete, isFoundingDeletable, searchQuery, s
         const transferTx = tx as ShareTransferTransaction;
         const seller = stakeholders.find(s => s.id === transferTx.sellerStakeholderId);
         const shareClass = allShareClassesAsOfNow.get(transferTx.shareClassId);
+        const purchasePrice = transferTx.numberOfShares * transferTx.pricePerShare;
+        const totalValue = purchasePrice + (transferTx.additionalPayment?.amount || 0);
         
         return (
             <TransactionCard title={translations.shareTransfer} date={transferTx.date} key={tx.id} actions={actionButtons} locale={locale}>
@@ -318,10 +336,18 @@ function TransactionList({ onEdit, onDelete, isFoundingDeletable, searchQuery, s
                 <DetailItem label={translations.buyer} value={transferTx.buyerStakeholderName} />
                 <DetailItem label={translations.shares} value={`${transferTx.numberOfShares.toLocaleString(locale)} ${shareClass?.name || ''}`} />
                 <DetailItem label={translations.pricePerShare} value={transferTx.pricePerShare} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
-                <DetailItem label={translations.totalInvestment} value={transferTx.numberOfShares * transferTx.pricePerShare} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
-                {transferTx.additionalPayment && (
-                    <DetailItem label={transferTx.additionalPayment.description || translations.additionalPayment} value={transferTx.additionalPayment.amount} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
-                )}
+                
+                <div className="mt-2 pt-2 border-t border-subtle">
+                    <h5 className="font-semibold text-secondary mb-1">{translations.cashPaymentDetails}</h5>
+                    <div className="pl-2 space-y-1">
+                        <DetailItem label={translations.totalPurchasePrice} value={purchasePrice} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
+                        {transferTx.additionalPayment && (
+                            <DetailItem label={transferTx.additionalPayment.description || translations.additionalPayment} value={transferTx.additionalPayment.amount} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
+                        )}
+                        <DetailItem label={translations.totalTransactionValue} value={totalValue} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
+                    </div>
+                </div>
+
                 {metaInfo}
             </TransactionCard>
         );
@@ -339,14 +365,40 @@ function TransactionList({ onEdit, onDelete, isFoundingDeletable, searchQuery, s
             }
         }
 
+        const baseInvestment = eqTx.purchasedShares * eqTx.pricePerShare;
+        let equalizationInterest = 0;
+        if (referenceTx) {
+            const startDate = new Date(referenceTx.date);
+            const endDate = new Date(eqTx.date);
+            if (endDate > startDate) {
+                const years = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+                equalizationInterest = baseInvestment * eqTx.equalizationInterestRate * years;
+            }
+        }
+        const totalCashPayment = baseInvestment + equalizationInterest;
+
         return (
             <TransactionCard title={translations.equalizationPurchase} date={eqTx.date} key={tx.id} actions={actionButtons} locale={locale}>
                 <DetailItem label={translations.newStakeholderName} value={eqTx.newStakeholderName} />
                 <DetailItem label={translations.purchasedShares} value={`${eqTx.purchasedShares.toLocaleString(locale)} ${shareClass?.name || ''}`} />
                 <DetailItem label={translations.pricePerShare} value={eqTx.pricePerShare} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
-                <DetailItem label={translations.investmentAmount} value={eqTx.purchasedShares * eqTx.pricePerShare} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
-                <DetailItem label={translations.equalizationInterestRate} value={`${(eqTx.equalizationInterestRate * 100).toFixed(2)}%`} isNumeric />
-                <DetailItem label={translations.referenceTransaction} value={referenceTxName} />
+                
+                <div className="mt-2 pt-2 border-t border-subtle">
+                    <h5 className="font-semibold text-secondary mb-1">{translations.cashPaymentDetails}</h5>
+                    <div className="pl-2 space-y-1">
+                        <DetailItem label={translations.baseInvestment} value={baseInvestment} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
+                        <DetailItem label={translations.equalizationInterest} value={equalizationInterest} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
+                        <DetailItem label={translations.totalCashPayment} value={totalCashPayment} isNumeric isCurrency locale={locale} projectCurrency={projectCurrency}/>
+                    </div>
+                </div>
+
+                <div className="mt-2 pt-2 border-t border-subtle">
+                    <h5 className="font-semibold text-secondary mb-1">{translations.equalizationDetails}</h5>
+                    <div className="pl-2 space-y-1">
+                        <DetailItem label={translations.equalizationInterestRate} value={`${(eqTx.equalizationInterestRate * 100).toFixed(2)}%`} isNumeric />
+                        <DetailItem label={translations.referenceTransaction} value={referenceTxName} />
+                    </div>
+                </div>
                 {metaInfo}
             </TransactionCard>
         );
@@ -382,8 +434,8 @@ function TransactionList({ onEdit, onDelete, isFoundingDeletable, searchQuery, s
                 <DetailItem label={translations.shareClassName} value={newShareClassState?.name || 'N/A'} />
                 <p className="font-semibold mt-2 text-secondary">{translations.updatedProperties}:</p>
                 <div className="space-y-1 pl-2">
-                    {Object.entries(updateTx.updatedProperties).map(([key, value]) => {
-                        const oldValue = oldShareClassState ? (oldShareClassState as any)[key] : 'N/A';
+                    {(Object.entries(updateTx.updatedProperties) as [keyof ShareClass, any][]).map(([key, value]) => {
+                        const oldValue = oldShareClassState ? oldShareClassState[key] : 'N/A';
                         const tKey = (key === 'name' ? 'shareClassName' : key) as keyof Translations;
                         
                         const translationCandidate = translations[tKey];
@@ -392,9 +444,9 @@ function TransactionList({ onEdit, onDelete, isFoundingDeletable, searchQuery, s
                         return (
                             <div key={key} className="text-sm">
                                 <span className="font-medium text-primary">{keyTranslation}: </span>
-                                <span className="text-danger font-mono">{oldValue?.toString() || 'N/A'}</span>
+                                <span className="text-danger font-mono">{String(oldValue) || 'N/A'}</span>
                                 <span className="text-secondary mx-1">➔</span>
-                                <span className="text-success font-mono">{value?.toString() || 'N/A'}</span>
+                                <span className="text-success font-mono">{String(value) || 'N/A'}</span>
                             </div>
                         );
                     })}

@@ -15,7 +15,11 @@ interface LocalizationContextType {
 
 const LocalizationContext = createContext<LocalizationContextType | undefined>(undefined);
 
-export const LocalizationProvider = ({ children }: { children: React.ReactNode }) => {
+interface LocalizationProviderProps {
+  children: React.ReactNode;
+}
+
+export const LocalizationProvider: React.FC<LocalizationProviderProps> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>('de');
 
   useEffect(() => {

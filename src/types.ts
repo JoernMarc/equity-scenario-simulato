@@ -1,5 +1,4 @@
 
-
 export type Language = 'de' | 'en';
 
 export enum TransactionType {
@@ -85,7 +84,7 @@ export interface FoundingTransaction extends BaseTransaction {
   type: TransactionType.FOUNDING;
   companyName: string;
   legalForm: string;
-  currency: string;
+  currency?: string;
   shareClasses: ShareClass[];
   shareholdings: Shareholding[];
   vestingSchedules?: VestingSchedule[];
@@ -185,6 +184,20 @@ export type Transaction =
   | UpdateShareClassTransaction;
 
 
+// --- Voting Simulation Result Types ---
+export interface VoteDistributionEntry {
+  stakeholderName: string;
+  shareClassName: string;
+  votes: number;
+  percentage: number;
+}
+
+export interface VotingResult {
+  asOfDate: string;
+  totalVotes: number;
+  voteDistribution: VoteDistributionEntry[];
+}
+
 // --- Result Types for future calculations ---
 
 export interface CapTableEntry {
@@ -233,33 +246,69 @@ export interface WaterfallResult {
   calculationLog: string[];
 }
 
+// --- Stakeholder Payout Summary ---
+export interface StakeholderPayoutSummaryEntry {
+    stakeholderId: string;
+    stakeholderName: string;
+    totalPayout: number;
+    multipleOnInvestment: number;
+    percentageOfTotal: number;
+}
+export interface StakeholderPayoutSummaryResult {
+    entries: StakeholderPayoutSummaryEntry[];
+}
+
+
 // --- Total Capitalization Types ---
+export type TotalCapitalizationInstrumentType = 'Equity' | 'Hybrid' | 'Debt';
+
 export interface TotalCapitalizationEntry {
   key: string;
   stakeholderName: string;
   instrumentName: string; // e.g., "Common Stock" or "Convertible Loan 2023-10-26"
-  instrumentType: string; // e.g., "Equity" or "Hybrid"
+  instrumentType: TotalCapitalizationInstrumentType;
   amountOrShares: string; // Formatted string, e.g., "25,000" or "€50,000"
   value: number;
+  valueBreakdown?: {
+    principal: number;
+    interest: number;
+  };
 }
 
 export interface TotalCapitalizationResult {
   entries: TotalCapitalizationEntry[];
   totalValue: number;
+  currency: string;
 }
 
-// --- Voting Simulation Result Types ---
-export interface VoteDistributionEntry {
-    stakeholderName: string;
-    shareClassName: string;
-    votes: number;
-    percentage: number;
+// --- Cashflow Types ---
+export interface CashflowEntry {
+  key: string;
+  date: string;
+  description: string;
+  cashIn: number;
+  cashOut: number;
+  balance: number;
 }
 
-export interface VotingResult {
-    voteDistribution: VoteDistributionEntry[];
-    totalVotes: number;
-    asOfDate: string;
+export interface CashflowResult {
+  entries: CashflowEntry[];
+  finalBalance: number;
+  currency: string;
+}
+
+// --- Project Assessment Types ---
+export type AssessmentFindingSeverity = 'danger' | 'warning' | 'info';
+
+export interface AssessmentFinding {
+  severity: AssessmentFindingSeverity;
+  title: string;
+  description: string;
+}
+
+export interface ProjectAssessmentResult {
+  asOfDate: string;
+  findings: AssessmentFinding[];
 }
 
 // --- Sample Scenarios ---
@@ -278,6 +327,7 @@ export interface SampleScenario {
 export interface Project {
   id: string;
   name: string;
+  currency: string;
   transactions: Transaction[];
   stakeholders: Stakeholder[];
 }
@@ -289,7 +339,7 @@ export interface ParsedImportData {
 }
 
 // --- Accessibility & UI ---
-export const FONT_SIZES = ['sm', 'base', 'lg', 'xl'] as const;
+export const FONT_SIZES = ['xs', 'sm', 'base', 'lg', 'xl'] as const;
 export type FontSize = typeof FONT_SIZES[number];
 
 export const THEMES = ['classic', 'modern', 'contrast'] as const;

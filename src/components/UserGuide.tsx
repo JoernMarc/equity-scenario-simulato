@@ -1,7 +1,5 @@
 
-
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import type { SampleScenario } from '../types';
 import type { Translations } from '../i18n';
 import ChevronDownIcon from '../styles/icons/ChevronDownIcon';
@@ -12,11 +10,21 @@ interface UserGuideProps {
   onLoadScenario: (scenarioData: SampleScenario['data']) => void;
 }
 
-const useCaseIds = ['01', '02', '03', '04', '05', '06', '07', '08', '09'];
+const useCaseIds = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'];
 const howItWorksSteps = ['1', '2', '3', '4'];
-type ActiveTab = 'howItWorks' | 'useCases' | 'sampleScenarios';
+const faqIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+type ActiveTab = 'howItWorks' | 'useCases' | 'sampleScenarios' | 'faq';
 
-const AccordionItem = ({ title, goal, features, isOpen, onToggle, translations }: { title: string, goal: string, features: string, isOpen: boolean, onToggle: () => void, translations: Translations }) => {
+interface AccordionItemProps {
+  title: string;
+  goal: string;
+  features: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  translations: Translations;
+}
+
+const AccordionItem: React.FC<AccordionItemProps> = ({ title, goal, features, isOpen, onToggle, translations }) => {
     return (
         <div className="border-b border-subtle">
             <button
@@ -39,8 +47,8 @@ const AccordionItem = ({ title, goal, features, isOpen, onToggle, translations }
 
 function UserGuide({ onLoadScenario }: UserGuideProps) {
   const { t: translations } = useLocalization();
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('howItWorks');
+  const [isOpen, setIsOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<ActiveTab>('sampleScenarios');
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
 
   const toggleAccordion = (id: string) => {
@@ -78,6 +86,9 @@ function UserGuide({ onLoadScenario }: UserGuideProps) {
                 </button>
                 <button onClick={() => setActiveTab('sampleScenarios')} className={tabButtonClasses('sampleScenarios')}>
                     {translations.tabSampleScenarios}
+                </button>
+                <button onClick={() => setActiveTab('faq')} className={tabButtonClasses('faq')}>
+                    {translations.tabFaq}
                 </button>
             </nav>
           </div>
@@ -147,6 +158,35 @@ function UserGuide({ onLoadScenario }: UserGuideProps) {
                     </div>
                 </section>
              )}
+             {activeTab === 'faq' && (
+                <section aria-labelledby="faq-title">
+                    <h3 id="faq-title" className="text-xl font-bold text-primary mb-2">{translations.faq.title}</h3>
+                    <div className="border-t border-subtle">
+                        {faqIds.map(id => {
+                            const titleKey = `q${id}Title` as keyof Translations['faq'];
+                            const answerKey = `q${id}Answer` as keyof Translations['faq'];
+                            
+                            return (
+                                <div key={`faq-${id}`} className="border-b border-subtle">
+                                    <button
+                                        onClick={() => toggleAccordion(`faq-${id}`)}
+                                        className="w-full flex justify-between items-center text-left py-3 px-2"
+                                        aria-expanded={openAccordion === `faq-${id}`}
+                                    >
+                                        <span className="font-semibold text-primary">{translations.faq[titleKey]}</span>
+                                        <ChevronDownIcon className={`w-5 h-5 text-secondary transition-transform ${openAccordion === `faq-${id}` ? 'rotate-180' : ''}`} />
+                                    </button>
+                                    {openAccordion === `faq-${id}` && (
+                                        <div className="px-2 pb-4 text-sm text-secondary prose prose-sm max-w-none">
+                                            <p dangerouslySetInnerHTML={{ __html: translations.faq[answerKey] }} />
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
+                </section>
+            )}
           </div>
         </div>
       )}

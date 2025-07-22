@@ -1,3 +1,5 @@
+
+
 import React, { useState, useMemo } from 'react';
 import type { FinancingRoundTransaction, Shareholding, ShareClass, ConvertibleLoanTransaction, LiquidationPreferenceType, AntiDilutionProtection } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
@@ -150,7 +152,10 @@ function FinancingRoundForm({ onSubmit, onCancel, transactionToEdit, preRoundTot
               <input type="text" id="roundName" value={roundName} onChange={e => setRoundName(e.target.value)} required className={baseInputClasses}/>
             </div>
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-secondary">{translations.date}</label>
+              <label htmlFor="date" className="flex items-center text-sm font-medium text-secondary">
+                  {translations.date}
+                  <HelpTooltip text={translations.help.date} />
+              </label>
               <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} required className={baseInputClasses}/>
             </div>
             <div className="md:col-span-2">
@@ -177,11 +182,17 @@ function FinancingRoundForm({ onSubmit, onCancel, transactionToEdit, preRoundTot
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                  <div>
-                    <label htmlFor="liqPrefRank" className="block text-sm font-medium text-secondary">{translations.liquidationPreferenceRank}</label>
+                    <label htmlFor="liqPrefRank" className="flex items-center text-sm font-medium text-secondary">
+                        {translations.liquidationPreferenceRank}
+                        <HelpTooltip text={translations.help.liquidationPreferenceRank} />
+                    </label>
                     <input id="liqPrefRank" type="number" min="1" value={newShareClass.liquidationPreferenceRank} onChange={e => handleShareClassChange('liquidationPreferenceRank', parseInt(e.target.value,10) || 1)} required className={`${baseInputClasses} text-right`}/>
                 </div>
                  <div>
-                    <label htmlFor="liqPrefFactor" className="block text-sm font-medium text-secondary">{translations.liquidationPreferenceFactor}</label>
+                    <label htmlFor="liqPrefFactor" className="flex items-center text-sm font-medium text-secondary">
+                      {translations.liquidationPreferenceFactor}
+                      <HelpTooltip text={translations.help.liquidationPreferenceFactor} />
+                    </label>
                     <input id="liqPrefFactor" type="number" min="1" step="0.1" value={newShareClass.liquidationPreferenceFactor} onChange={e => handleShareClassChange('liquidationPreferenceFactor', parseFloat(e.target.value) || 1)} required className={`${baseInputClasses} text-right`}/>
                 </div>
                  <div>
@@ -200,7 +211,12 @@ function FinancingRoundForm({ onSubmit, onCancel, transactionToEdit, preRoundTot
                       {translations.participationCapFactor}
                       <HelpTooltip text={translations.help.participationCapFactor} />
                     </label>
-                    <input id="participationCapFactor" type="number" min="1" value={newShareClass.participationCapFactor} onChange={e => handleShareClassChange('participationCapFactor', parseFloat(e.target.value))} className={`${baseInputClasses} text-right`}/>
+                    <input 
+                      id="participationCapFactor" 
+                      type="number" min="1" 
+                      value={newShareClass.participationCapFactor || ''} 
+                      onChange={e => handleShareClassChange('participationCapFactor', parseFloat(e.target.value) || undefined)} 
+                      className={`${baseInputClasses} text-right`}/>
                 </div>
             )}
              <div>
@@ -214,11 +230,17 @@ function FinancingRoundForm({ onSubmit, onCancel, transactionToEdit, preRoundTot
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label htmlFor="votesPerShare" className="block text-sm font-medium text-secondary">{translations.votesPerShare}</label>
+                    <label htmlFor="votesPerShare" className="flex items-center text-sm font-medium text-secondary">
+                      {translations.votesPerShare}
+                      <HelpTooltip text={translations.help.votesPerShare} />
+                    </label>
                     <input id="votesPerShare" type="number" min="0" value={newShareClass.votesPerShare} onChange={e => handleShareClassChange('votesPerShare', parseInt(e.target.value, 10) || 0)} required className={`${baseInputClasses} text-right`}/>
                 </div>
                 <div>
-                    <label htmlFor="protectiveProvisions" className="block text-sm font-medium text-secondary">{translations.protectiveProvisions}</label>
+                    <label htmlFor="protectiveProvisions" className="flex items-center text-sm font-medium text-secondary">
+                      {translations.protectiveProvisions}
+                      <HelpTooltip text={translations.help.protectiveProvisions} />
+                    </label>
                     <input id="protectiveProvisions" type="text" value={(newShareClass.protectiveProvisions || []).join(', ')} onChange={handleProvisionsChange} className={baseInputClasses}/>
                 </div>
             </div>
@@ -267,7 +289,7 @@ function FinancingRoundForm({ onSubmit, onCancel, transactionToEdit, preRoundTot
                   id={`loan-${loan.id}`}
                   checked={convertsLoanIds.includes(loan.id)}
                   onChange={() => handleLoanSelection(loan.id)}
-                  className="h-4 w-4 rounded border-strong text-interactive focus:ring-interactive cursor-pointer"
+                  className="h-4 w-4 rounded border-strong text-interactive focus:ring-interactive cursor-pointer accent-interactive"
                 />
                 <label htmlFor={`loan-${loan.id}`} className="flex-grow text-sm cursor-pointer">
                   <span className="font-medium text-primary">{loan.investorName}</span>
@@ -296,11 +318,17 @@ function FinancingRoundForm({ onSubmit, onCancel, transactionToEdit, preRoundTot
               </select>
             </div>
             <div>
-              <label htmlFor="validFrom" className="block text-sm font-medium text-secondary">{translations.validFrom}</label>
+              <label htmlFor="validFrom" className="flex items-center text-sm font-medium text-secondary">
+                  {translations.validFrom}
+                  <HelpTooltip text={translations.help.validFrom} />
+              </label>
               <input type="date" id="validFrom" value={validFrom} onChange={e => setValidFrom(e.target.value)} required className={baseInputClasses}/>
             </div>
             <div>
-              <label htmlFor="validTo" className="block text-sm font-medium text-secondary">{translations.validTo} <span className="text-subtle">({translations.optional})</span></label>
+              <label htmlFor="validTo" className="flex items-center text-sm font-medium text-secondary">
+                  {translations.validTo} <span className="text-subtle">({translations.optional})</span>
+                  <HelpTooltip text={translations.help.validTo} />
+              </label>
               <input type="date" id="validTo" value={validTo} onChange={e => setValidTo(e.target.value)} className={baseInputClasses}/>
             </div>
         </div>

@@ -5,9 +5,9 @@ export const translations = {
     appTitle: "Equity Scenario Simulator",
     companyDetails: "Company Details",
     transactionLog: "Transaction Log",
-    resultsDisplay: "Results Display",
+    resultsDisplay: "Results & Simulations",
     resultsPlaceholder: "Calculate the Cap Table to see the results.",
-    noTransactions: "No transactions added yet. Start by creating a company.",
+    noTransactions: "No transactions have been added yet. Start by creating a company with a 'Founding' transaction.",
     addTransaction: "Add Transaction",
     createFounding: "Create Company",
     addConvertible: "Add Convertible",
@@ -61,12 +61,13 @@ export const translations = {
     editUpdateShareClass: "Edit Share Class Update",
     confirmDelete: "Confirm Deletion",
     confirmDeleteMessage: "Are you sure you want to delete this transaction? This action cannot be undone.",
-    deleteDisabledTooltip: "Cannot delete founding transaction while other transactions exist.",
+    deleteDisabledTooltip: "The founding transaction cannot be deleted while other transactions exist.",
     postMoneyValuation: "Post-Money Valuation",
     pricePerShare: "Price per Share",
     perShare: "per share",
+    search: "Search Transactions",
     searchPlaceholder: "Search by company, investor, shareholder...",
-    noSearchResults: "No transactions match your search.",
+    noSearchResults: "No transactions match your search query.",
     status: "Status",
     validFrom: "Valid From",
     validTo: "Valid To",
@@ -100,7 +101,7 @@ export const translations = {
     shareholdings: "Shareholdings",
     stakeholderName: "Stakeholder Name",
     addShareholding: "Add Shareholding",
-    noConvertibleLoans: "No convertible loans available to convert.",
+    noConvertibleLoans: "No convertible loans are available to be converted.",
     newShareClassDetails: "New Share Class Details",
     investmentRoundDetails: "Investment Round Details",
     votesPerShare: "Votes per Share",
@@ -155,7 +156,7 @@ export const translations = {
 
     // New validation messages
     requiredShareCapital: "Required Share Capital",
-    shareCapitalRequirementWarning: "Note: The total investment is less than the typical required share capital of {amount}. The check is only performed if the project currency matches the legal form's currency.",
+    shareCapitalRequirementWarning: "Note: The total investment is less than the typical required share capital of {amount}. This check is only performed if the project currency matches the legal form's currency.",
     
     // Cap Table Calculation
     asOfDate: "As of Date",
@@ -172,7 +173,7 @@ export const translations = {
     exitProceeds: "Exit Proceeds",
     transactionCosts: "Transaction Costs",
     simulateWaterfall: "Simulate Waterfall",
-    waterfallResultsTitle: "Waterfall Distribution Results ({currency})",
+    waterfallResultsTitle: "Waterfall Distribution Results",
     initialInvestment: "Initial Inv.",
     fromDebtRepayment: "From Debt",
     fromLiquidationPreference: "From Pref.",
@@ -186,16 +187,26 @@ export const translations = {
     calculationSteps: "Calculation Steps",
     showCalculationSteps: "Show Calculation Steps",
     hideCalculationSteps: "Hide Calculation Steps",
+    lastRun: "Last run",
+    notRunYet: "Not run yet",
+
+    // Stakeholder Payout Summary
+    stakeholderPayoutSummaryTitle: "Exit Payout Summary",
+    totalPayout: "Total Payout",
+    multipleOnInvestment: "Multiple (MOIC)",
+    percentageOfTotal: "% of Total",
 
     // Total Capitalization
-    totalCapitalizationTitle: "Total Capitalization Overview ({currency})",
+    totalCapitalizationTitle: "Total Capitalization Overview",
     instrument: "Instrument",
     instrumentType: "Type",
-    amountOrShares: "Amount / Shares",
-    value: "Value ({currency})",
+    amountOrShares: "Nominal Amount / Shares",
+    value: "Value",
     equity: "Equity",
     hybrid: "Hybrid",
     debt: "Debt",
+    principalAmount: "Principal Amount",
+    accruedInterest: "Accrued Interest",
 
     // Voting Simulation
     votingSimulationTitle: "Voting Power Simulation",
@@ -204,6 +215,43 @@ export const translations = {
     votes: "Votes",
     totalVotes: "Total Votes",
     noVoteYet: "Simulate the vote to see the distribution.",
+
+    // Cashflow View
+    cashflowViewTitle: "Cashflow Overview",
+    description: "Description",
+    cashIn: "Cash In",
+    cashOut: "Cash Out",
+    balance: "Balance",
+    finalBalance: "Final Balance",
+    
+    // Project Assessment
+    projectAssessment: {
+      title: "Project Assessment & Insights",
+      analyzeProject: "Analyze Project",
+      noFindings: "No specific issues or best practices were flagged based on the current rule set. Please review manually.",
+      noIssuesFoundTitle: "Looking Good",
+      noIssuesFoundDesc: "No common red flags or warnings were detected based on our rule set. The project structure appears standard.",
+      findingFounderNoVestingTitle: "Founder Has No Vesting",
+      findingFounderNoVestingDesc: "Founder '{stakeholderName}' holds shares without an assigned vesting schedule. This is a significant red flag for investors as it may indicate a lack of long-term commitment.",
+      findingAggressiveLiqPrefTitle: "Aggressive Liquidation Preference",
+      findingAggressiveLiqPrefDesc: "The '{shareClassName}' class has a {factor}x liquidation preference, which is higher than the standard 1x. This heavily favors these investors in an exit scenario.",
+      findingFullRatchetTitle: "Full Ratchet Anti-Dilution",
+      findingFullRatchetDesc: "The '{shareClassName}' class has 'Full Ratchet' anti-dilution protection. This is a very aggressive, investor-friendly term that can severely dilute founders and other shareholders in a down round.",
+      findingDownRoundTitle: "Down Round Detected",
+      findingDownRoundDesc: "The financing round '{roundName}' occurred at a pre-money valuation lower than the previous round's post-money valuation. This may trigger anti-dilution provisions for earlier investors.",
+      findingStandardVestingTitle: "Standard Founder Vesting Applied",
+      findingStandardVestingDesc: "The use of a 4-year vesting schedule with a 1-year cliff for founders is a strong, recognized industry standard that aligns stakeholder and investor interests.",
+    },
+
+    // Comparison View
+    comparisonViewTitle: "Project Comparison",
+    compareProjects: "Compare Projects",
+    startComparison: "Compare Selected",
+    selectTwoProjects: "Select two projects to compare.",
+    printComparison: "Print Comparison",
+    projectA: "Project A",
+    projectB: "Project B",
+
 
     // Print & Export Results
     print: "Print",
@@ -215,16 +263,16 @@ export const translations = {
     importExport: "Import / Export",
     importExportTitle: "Import & Export Data",
     exportToJson: "Export to JSON (Backup)",
-    exportDescription: "Download the active project's data in a technical JSON format.",
+    exportDescription: "Download the active project's data in a technical JSON format for backup or sharing.",
     exportAsExcelTemplate: "Export as Excel Template",
-    exportAsExcelTemplateDescription: "Download the active project's data in a user-friendly Excel file for editing and re-import.",
+    exportAsExcelTemplateDescription: "Download the project's data in an Excel file. This can be edited and re-imported to create a new scenario.",
     importFromExcel: "Import from Excel",
-    importDescription: "Upload an Excel file to create a new project. Use the exported template as a starting point.",
-    importInstructionsTitle: "User-Friendly Excel Structure (4 Sheets):",
-    importSheetTransactions: "Sheet 'Transactions': Main list of events. Each row must have a unique 'transactionName'. For financing rounds, use the 'convertsLoanTransactionNames' column to specify which loans to convert.",
-    importSheetStakeholders: "Sheet 'Stakeholders': List all unique people/entities. Each must have a unique, user-defined 'stakeholderId' to avoid issues with duplicate names.",
-    importSheetShareClasses: "Sheet 'ShareClasses': Defines each share class, linked via 'transactionName'.",
-    importSheetShareholdings: "Sheet 'Shareholdings': Links everything using 'transactionName', 'stakeholderId', and 'shareClassName'.",
+    importDescription: "Upload an Excel file to create a new project. For best results, use the exported template as a starting point.",
+    importInstructionsTitle: "Excel Import Guide",
+    importSheetTransactions: "The Excel file is structured into several sheets: 'Transactions', 'Stakeholders', 'ShareClasses', 'Shareholdings', and 'VestingSchedules'.",
+    importSheetStakeholders: "Each sheet contains a part of the total project data. The 'Transactions' sheet is the master list of all events.",
+    importSheetShareClasses: "The other sheets contain the detailed data for each transaction, linked by a 'transaction_id'.",
+    importSheetShareholdings: "For a reliable workflow, it's highly recommended to export an existing project to Excel to use as a template. This ensures your file has the correct structure and column headers.",
     dropFileHere: "Drop Excel file here, or click to select",
     importSuccess: "Data imported successfully!",
     importError: "Import Failed",
@@ -233,21 +281,23 @@ export const translations = {
     importDataFound: "Project '{projectName}' found with {countTransactions} transactions and {countStakeholders} stakeholders.",
     confirmImport: "Create Project",
     tryAgain: "Try Again",
-    importPreviewWarning: "Confirming will create a new project with this data.",
+    importPreviewWarning: "Confirming will create a new project with this data. The current project will not be affected.",
 
     // Project Management
     projectsDashboard: "Projects Dashboard",
     createNewProject: "Create New Project",
     projectName: "Project Name",
-    enterProjectName: "Enter project name...",
+    projectCurrency: "Project Currency",
+    enterProjectName: "Enter a name for your new project",
     create: "Create",
     selectProject: "Select Project",
-    noProjects: "No projects yet. Create one to get started!",
+    noProjects: "No projects yet. Create one or load a sample scenario to get started!",
     backToDashboard: "Back to Dashboard",
     confirmDeleteProjectTitle: "Delete Project?",
     confirmDeleteProjectMessage: "Are you sure you want to delete the project '{projectName}'? This is permanent and cannot be undone.",
     renameProject: "Rename Project",
     activeProject: "Active Project",
+    myProjectsTitle: "My Projects & Scenarios",
     projectDashboardHintTitle: "New? Start Here!",
     projectDashboardHintText: "To explore the app's features without manual data entry, try loading one of the sample scenarios below. They provide a quick and easy way to see the tool in action.",
     
@@ -259,27 +309,46 @@ export const translations = {
     fixedConversionPrice: "Fixed Conversion Price ({currency} / Share)",
     ratioShares: "Shares",
     forAmount: "for Amount ({currency})",
+    
+    // Cash Payment Details
+    cashPaymentDetails: "Cash Payment Details",
+    baseInvestment: "Base Investment",
+    equalizationInterest: "Equalization Interest",
+    totalCashPayment: "Total Cash Payment",
+    totalPurchasePrice: "Total Purchase Price",
+    totalTransactionValue: "Total Transaction Value",
 
     // Help Tooltips
     help: {
+      date: "The historical date of the transaction (e.g., the signing date of a contract). It is used for sorting the transaction log.",
+      validFrom: "The effective date from which the transaction is included in all calculations (Cap Table, Waterfall). This is the key date for the simulation.",
+      validTo: "An optional end date for the transaction's validity. If set, the transaction will be ignored in calculations after this date.",
       currency: "Enter the 3-letter ISO code for the project's primary currency (e.g., EUR, USD). This will be used for all financial displays throughout the application.",
-      preMoneyValuation: "The value of the company before new money is invested in a financing round.",
+      preMoneyValuation: "The value of the company *before* new money is invested. It is a negotiated figure and the basis for calculating the price per share for new investors. It is *not* automatically the post-money valuation of the previous round, as company value can change due to performance or market conditions.",
       valuationCap: "A ceiling on the valuation at which a convertible instrument converts into equity. The investor gets the better deal of either the valuation cap or the discount.",
-      discount: "A percentage reduction on the price per share of the financing round, at which the convertible instrument converts.",
+      discount: "A percentage reduction on the price per share of the financing round at which the convertible instrument converts.",
+      liquidationPreferenceRank: "Defines the payout order in a liquidation. Rank 1 gets paid first, then Rank 2, and so on. Common Stock has a rank of 0.",
       liquidationPreferenceType: "NON_PARTICIPATING: Gets preference or converts to common stock (chooses better). FULL_PARTICIPATING: Gets preference AND participates with common stock. CAPPED_PARTICIPATING: Gets preference and participates until a total return cap is met.",
-      participationCapFactor: "For 'Capped Participating' preference, this is the total return multiple (e.g., 3x) an investor can receive. Includes the initial preference.",
-      antiDilutionProtection: "Protects earlier investors from dilution if a future financing round happens at a lower valuation ('down round'). 'Full Ratchet' is the strongest form.",
+      liquidationPreferenceFactor: "The multiple of the investment that an investor gets back before others (e.g., 1x, 2x). A 1x factor means they get their money back; a 2x factor means they get double their investment back before other distributions.",
+      participationCapFactor: "For 'Capped Participating' preference, this is the total return multiple (e.g., 3x) an investor can receive. This includes the initial preference amount.",
+      antiDilutionProtection: "Protects earlier investors from dilution if a future financing round happens at a lower valuation ('down round'). 'Full Ratchet' is the strongest form, while 'Broad-based' is more common.",
       vestingCliff: "A period at the beginning of a vesting schedule during which no shares are vested. If employment terminates before the cliff, no shares are granted.",
       shareTransfer: "Models a 'Secondary Transaction' where an existing stakeholder sells their shares to another (new or existing) stakeholder. This transaction reassigns ownership without issuing new shares from the company treasury.",
+      additionalPayment: "Used to record any extra cash payments associated with the share transfer, such as an equalization payment or a special bonus. This amount does not affect the share calculation but is recorded for financial tracking.",
       vestingSchedules: "Vesting schedules define how ownership of shares is earned over time, typically for founders and employees, to ensure long-term commitment. A schedule includes a total vesting period (e.g., 48 months) and often a 'cliff' (e.g., 12 months). No shares are vested before the cliff is met. After the cliff, a portion vests, and the rest typically vests monthly. Vested shares determine ownership in calculations like voting power and waterfall simulations.",
       shareholdings: "List all initial shareholders, their number of shares, and any initial cash investment. The 'price per share' is calculated automatically from investment and shares. You can assign a vesting schedule to a shareholding, which is common for founders or employees.",
       initialShareClasses: "Define the initial types of shares for the company. At founding, this is typically 'Common Stock' with 1 vote per share and no special preferences. More complex share classes are usually introduced in later financing rounds.",
       convertibleLoan: "A convertible loan (or note) is a form of short-term debt that converts into equity, typically during a future financing round. It's a common way for seed-stage companies to raise capital quickly. Select the conversion mechanism that matches your term sheet.",
+      seniority: "Determines the repayment priority in a liquidation event. Senior debt is paid before subordinated debt. Convertible loans are typically 'Subordinated', meaning they are paid after senior bank loans but before equity holders.",
+      debtSeniority: "Determines the repayment priority in a liquidation event. *Senior Secured* is backed by collateral and paid first. *Senior Unsecured* is next. *Subordinated* debt is paid last, before any equity holders.",
+      interestOnDebt: "This interest rate is used in the Waterfall Simulation. Accrued simple interest is calculated from the loan's start date to the simulation date. This interest is added to the principal loan amount, and the total sum is paid back to the lender according to their seniority before any proceeds are distributed to equity holders.",
       conversionMechanism: "Defines how the loan converts into equity. 'Cap & Discount' is typical for VC deals. 'Fixed Price' uses a predefined price per share. 'Fixed Ratio' defines a set number of shares per invested amount.",
       fixedPrice: "The loan converts into shares at this exact price per share, regardless of the valuation in the financing round.",
-      fixedRatio: "The loan converts based on a defined ratio. For example, '1 Share for Amount 1000' means the investor receives one share for every invested amount of the project's currency.",
+      fixedRatio: "The loan converts based on a defined ratio. For example, '1 Share for Amount 1000' means the investor receives one share for every 1000 units of the project's currency invested.",
       financingRoundDetails: "Enter the core financial details of the round. The Pre-Money Valuation is the company's value *before* this new investment. The price per share for new investors is calculated based on this valuation and the number of shares outstanding before the round.",
-      newShareClassDetailsFinancing: "Define the new class of shares being issued to investors in this round (e.g., 'Series A Preferred'). These shares often come with with special rights like liquidation preferences (getting paid back first in an exit), anti-dilution protection (protection from future 'down-rounds'), and different voting rights.",
+      newShareClassDetailsFinancing: "Define the new class of shares being issued to investors in this round (e.g., 'Series A Preferred'). These shares often come with special rights like liquidation preferences (getting paid back first in an exit), anti-dilution protection (protection from future 'down-rounds'), and different voting rights.",
+      votesPerShare: "The number of votes this share class grants per share. Can be used to create super-voting shares (e.g., 10 votes per share) for founders to retain control.",
+      protectiveProvisions: "Special rights that give a share class veto power over certain company decisions, such as selling the company, changing the board, or issuing more senior shares. Enter as comma-separated text.",
       newInvestors: "List the new investors participating in this round and their respective cash investment amounts. The number of shares they receive is calculated automatically based on the price per share determined by the pre-money valuation.",
       convertedLoans: "Select any existing convertible loans that will convert into equity in this financing round. The loan amount plus accrued interest will be converted into shares of the new share class, based on the loan's specific valuation cap and discount terms.",
       debtInstrument: "Record non-convertible debt, such as bank loans. The seniority ('Senior Secured', 'Senior Unsecured', 'Subordinated') is critical as it determines the repayment order in a liquidation event, before any equity holders receive proceeds.",
@@ -287,7 +356,9 @@ export const translations = {
       equalizationPurchase: "Models a transaction where a new investor buys into the company at a later stage but wants to be treated economically as if they had invested earlier. This is achieved by paying the original share price plus a calculated interest amount to 'equalize' their entry.",
       purchaseDetails: "The core details of the share purchase. This is similar to a secondary transaction but includes an equalization component.",
       equalizationDetails: "Defines the interest calculation to equalize this investment with an earlier one. Select the transaction (e.g., a previous financing round) to which this purchase should be back-dated for interest calculation purposes.",
-      equalizationInterestRate: "The annual interest rate used to calculate the additional payment required to 'equalize' this late entry with an earlier investment."
+      equalizationInterestRate: "The annual interest rate used to calculate the additional payment required to 'equalize' this late entry with an earlier investment.",
+      exitProceeds: "The total amount of cash received from the sale of the company before any fees or costs are deducted. This field is required to run the simulation.",
+      transactionCosts: "Any costs associated with the sale, such as investment banking fees or legal expenses, that are deducted from the exit proceeds before distribution to stakeholders."
     },
 
     // User Guide
@@ -297,6 +368,32 @@ export const translations = {
     tabHowItWorks: "How it Works",
     tabUseCases: "Use Cases",
     tabSampleScenarios: "Sample Scenarios",
+    tabFaq: "FAQ",
+    faq: {
+      title: "Frequently Asked Questions",
+      q1Title: "How should this application be used?",
+      q1Answer: "This application is a simulation tool designed for purposes such as business analysis, helping to bridge the gap between business requirements and technical implementation. It contains certain simplifications and is not intended for productive, real-world financial management.",
+      q2Title: "Is the system multi-currency capable?",
+      q2Answer: "Multi-currency support was deliberately omitted to keep the simulator's development lean and to focus on core functional workflows. However, due to its modular architecture, adding multi-currency support would be a feasible extension if required.",
+      q3Title: "What is the difference between 'Date', 'Valid From', and 'Valid To'?",
+      q3Answer: "This separation allows for precise, real-world modeling. 'Date' is the historical record date (e.g., when a contract was signed) and sorts the transaction log. 'Valid From' is the most important date for the simulator; it's the effective date when a transaction's financial impact begins. All calculations are based on the 'Simulation Date' you choose and only include transactions where 'Valid From' is on or before that date. 'Valid To' is an optional expiration date.",
+      q4Title: "Where is my data stored? Is it secure?",
+      q4Answer: "Your data is stored exclusively in your browser's local storage (`localStorage`). It is never sent to any server. This means your data is as secure as your computer and you have full control. However, this also means you are responsible for backups using the export feature, as the data is not available on other devices.",
+      q5Title: "How can I share a scenario with a colleague?",
+      q5Answer: "The easiest way to share a project is to use the 'Import / Export' feature. Export your project as a JSON file. This file contains all the transaction data and can be sent to your colleague, who can then import it into their own simulator.",
+      q6Title: "How accurate are the financial calculations?",
+      q6Answer: "The calculations are designed to model common scenarios accurately based on standard terms. However, they include certain simplifications. For example, the waterfall simulation assumes that holders of non-participating preferred shares will always choose the economically superior option (convert or take preference), but does not model individual shareholder elections. The tool is for educational and modeling purposes and is not a substitute for professional legal or financial advice.",
+      q7Title: "How does share vesting impact the simulations?",
+      q7Answer: "Vesting is crucial. The cap table shows your total shares, but the Voting Power Simulation is based only on your *vested* shares as of the simulation date. Similarly, in a Waterfall Analysis, unvested shares are typically returned to the company and do not receive proceeds, so only vested shares participate. This correctly models the principle that you only own what has vested.",
+      q8Title: "How can I provide feedback?",
+      q8Answer: "This application is under continuous development. If you have any feedback, suggestions for improvement, or have found a bug, please send an email to kontakt@jodecon.de. We appreciate your input!",
+      q9Title: "Is the 'Project Assessment' feature using AI? Is my data sent to a server?",
+      q9Answer: "No, the Project Assessment feature does **not** use a cloud-based AI and your data is **never** sent to a server. To protect your privacy, this feature is a rule-based engine that runs entirely within your browser. It analyzes your project's structure against a predefined set of common venture capital standards and best practices. For a simulation tool, this approach guarantees privacy and speed. A production system might use different technologies.",
+      q10Title: "How can I compare two different scenarios?",
+      q10Answer: "From the main 'Projects Dashboard', click the **'Compare Projects'** button. This will enable a selection mode. Check the boxes next to the two projects you wish to compare, then click **'Compare Selected'**. This opens a side-by-side view where you can apply the same simulation date and waterfall inputs to both scenarios simultaneously to see how their results differ.",
+      q11Title: "What is the 'Exit Payout Summary'?",
+      q11Answer: "The 'Waterfall Distribution' provides a detailed, step-by-step breakdown of how exit proceeds are allocated across different payout tranches (debt, preferences, etc.). The 'Exit Payout Summary' complements this by providing a high-level overview that aggregates all these payouts for each stakeholder. It gives you a clear, final answer to 'who gets how much in total?' and also shows the return multiple (MOIC) for each stakeholder's investment."
+    },
     howItWorks: {
       title: "How the Equity Scenario Simulator Works",
       intro: "This application helps you model and understand company equity. It works in three main stages: Data Entry, Calculation, and Simulation. All data stays on your device.",
@@ -316,7 +413,7 @@ export const translations = {
         goal: "Goal",
         features: "Features Used",
         uc01Title: "UC-01: Project & Portfolio Management",
-        uc01Goal: "Manage multiple independent companies (clients, portfolio firms) without data mingling and securely save progress.",
+        uc01Goal: "Manage multiple independent companies (clients, portfolio firms) without data being intermingled and securely save progress.",
         uc01Features: "Projects Dashboard, Local Storage",
         uc02Title: "UC-02: Initial Setup & Founder Vesting",
         uc02Goal: "Create a clean cap table after incorporation, including founder shares and vesting plans to model their long-term commitment.",
@@ -342,6 +439,9 @@ export const translations = {
         uc09Title: "UC-09: Onboarding & Learning",
         uc09Goal: "Understand complex clauses and learn the tool quickly using predefined example scenarios and context-sensitive help.",
         uc09Features: "User Guide, Tooltips, Sample Scenarios",
+        uc10Title: "UC-10: A/B Scenario Testing",
+        uc10Goal: "Directly compare two different financing strategies or company structures side-by-side to analyze the impact on the cap table and exit waterfall.",
+        uc10Features: "Project Comparison View",
     },
     scenarioSeedRoundTitle: "Scenario 1: Typical Seed Round",
     scenarioSeedRoundDescription: "Demonstrates a company founding, a convertible loan from an angel investor, and a subsequent seed financing round that converts the loan. Includes a vesting schedule for one founder.",
@@ -351,6 +451,8 @@ export const translations = {
     scenarioAdvancedWaterfallDescription: "Demonstrates a waterfall simulation including senior and subordinated debt, showing the correct repayment hierarchy before equity distribution.",
     scenarioGovernanceTitle: "Scenario 4: Governance & Secondaries",
     scenarioGovernanceDescription: "Illustrates a share transfer (secondary) from a founder to a new investor, combined with an update to share class voting rights to create a super-majority.",
+    scenarioEqualizationTitle: "Scenario 5: Late Entry with Equalization",
+    scenarioEqualizationDescription: "Shows how an investor can join later but receive the same economic terms as an earlier round by making an additional equalization payment based on an interest rate.",
     
     // Workflow Diagram
     workflowTitle: "Company Lifecycle",
@@ -369,71 +471,72 @@ export const translations = {
     // Date Filtering
     simulationDateLabel: "Simulation Date",
     futureTransaction: "Future",
-    futureTransactionTooltip: "This transaction's date is after the simulation date and is not included in the current calculation.",
+    futureTransactionTooltip: "The date of this transaction is after the simulation date and is not included in the current calculation.",
     
-    // Accessibility
+    // Accessibility & UI
     accessibilityControls: "Accessibility",
-    decreaseFontSize: "Decrease Font Size",
-    increaseFontSize: "Increase Font Size",
+    decreaseFontSize: "Decrease font size",
+    increaseFontSize: "Increase font size",
     themeClassic: "Classic",
     themeModern: "Modern",
     themeContrast: "High Contrast",
     decreaseFontSizeTooltip: "Decrease Font Size",
     increaseFontSizeTooltip: "Increase Font Size",
-    themeClassicTooltip: "Classic Theme",
-    themeModernTooltip: "Modern Theme",
-    themeContrastTooltip: "High Contrast Theme",
+    themeClassicTooltip: "Classic Design",
+    themeModernTooltip: "Modern Design",
+    themeContrastTooltip: "High Contrast Design",
+    expand: "Expand",
+    collapse: "Collapse",
 
     // Legal & Footer
     footer: {
       legalNotice: "Legal Notice, Privacy & Disclaimer",
+      version: "Version",
     },
     legal: {
       title: "Legal Information",
       tabImpressum: "Legal Notice",
       tabPrivacy: "Privacy Policy",
       tabDisclaimer: "Disclaimer & License",
-      impressumTitle: "Legal Notice (Impressum)",
-      impressumText: "Information according to § 5 TMG:\n\nJörn Densing\nAuf dem Köllenhof 81\n53343 Wachtberg\nGermany\n\nContact:\nPhone: +49 175 2425446\nEmail: kontakt@jodecon.de",
+      impressumTitle: "Legal Notice",
+      impressumText: "Information pursuant to § 5 TMG:\n\nJörn Densing\nAuf dem Köllenhof 81\n53343 Wachtberg\nGermany\n\nContact:\nPhone: +49 175 2425446\nEmail: kontakt@jodecon.de",
       privacyTitle: "Privacy Policy",
       privacyText: `
-**1. General Principle**
-This application is a purely client-side tool. This means all logic, calculations, and data storage happen directly within your web browser on your own computer.
+**1. Fundamental Principle**
+This application is a purely client-side tool. This means that all logic, calculations, and data storage occur directly within your web browser on your own computer.
 
-**2. Data Storage and Security**
+**2. Storage Location and Security**
 All data you enter is stored exclusively in your web browser's local storage (\`localStorage\`).
-- **No Server Contact:** Your data is **never** sent to, or stored on, any external server. We have no access to your data.
-- **Data remains on your device:** Your financial models are private and stay on your computer, under your control.
+- **No Server Contact:** Your data is **never** sent to or stored on an external server. We do not have access to your data.
+- **Data Remains on Your Device:** Your financial models are private and remain on your computer under your control.
 
 **3. Data Availability and Backup**
-- **Device-Specific:** The data stored in \`localStorage\` is tied to the specific browser and device you are using. Data will **not** automatically sync between different computers or browsers.
-- **User-Managed Backups:** To save a scenario or transfer it to another device, you can use the 'Export to JSON (Backup)' feature. As this application is provided without any guarantee of availability or support (see Disclaimer), the responsibility for saving any data you deem important lies solely with you.
+- **Device-Specific:** The data stored in \`localStorage\` is tied to the specific browser and device you are using. Data is **not** automatically synchronized between different computers or browsers.
+- **User-Managed Backup:** To back up a scenario or transfer it to another device, you must use the 'Export to JSON (Backup)' feature. As the application is provided without any guarantee of availability or support (see Disclaimer), the responsibility for backing up important data lies solely with you.
 
 **4. Deleting Your Data**
-You have complete control over deleting your data through in-app functions or by clearing your browser's site data.
+You have complete control over deleting your data through features within the app or by clearing your browser's website data.
 
 **5. Third-Party Services**
-This application uses public Content Delivery Networks (CDNs) to load necessary libraries like Tailwind CSS and XLSX.js. This may involve your browser contacting these third-party servers to download these files.
+This application uses public Content Delivery Networks (CDNs) to load necessary libraries such as React and SheetJS (xlsx). This may result in your browser contacting these third-party servers to download these files.
 `,
       disclaimerTitle: "Disclaimer & License",
-      disclaimerText: `**Disclaimer and Limitation of Liability**
-This application is provided as a free tool for simulation purposes on an "as is" basis. The results are based on the data you provide and do not constitute financial, legal, or tax advice.
+      disclaimerText: `**Disclaimer of Liability and Warranty**
+This application is provided as a free tool for simulation purposes, "as is". The results are based on the data you provide and do not constitute financial, legal, or tax advice.
 
-Use of this tool is at your own risk. The operator assumes no liability whatsoever for the accuracy, completeness, or timeliness of the simulations, nor for any direct or indirect damages arising from the use of the application.
+Use of this tool is at your own risk. The operator assumes no liability whatsoever for the accuracy, completeness, or timeliness of the simulations, or for any direct or indirect damages arising from the use of the application.
 
-No support is provided for the application, and there is no guarantee of its long-term availability, functionality, or freedom from errors.
+No support is provided for the application, and there is no guarantee of long-term availability, functionality, or error-free service.
 
 **Feedback**
 I am grateful for any feedback or suggestions for improvement. Please send them to: kontakt@jodecon.de
 
 **Copyright & License**
-Copyright (c) 2025 Jörn Densing, Wachtberg (Deutschland)
+Copyright (c) 2025 Jörn Densing, Wachtberg (Germany)
 
-All Rights Reserved.
+All rights reserved.
 
-Permission to use, copy, modify, and distribute this software and its
-documentation for any purpose and without fee is hereby prohibited, 
-without a written agreement with Jörn Densing, Wachtberg (Deutschland).
+The use, copying, modification, and distribution of this software and its documentation for any purpose and without a fee are hereby prohibited without a written agreement with Jörn Densing, Wachtberg (Germany).
 `,
     },
   },
@@ -441,9 +544,9 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
     appTitle: "Equity Scenario Simulator",
     companyDetails: "Unternehmensdaten",
     transactionLog: "Transaktions-Log",
-    resultsDisplay: "Ergebnisanzeige",
+    resultsDisplay: "Ergebnisse & Simulationen",
     resultsPlaceholder: "Berechnen Sie die Cap Table, um die Ergebnisse zu sehen.",
-    noTransactions: "Noch keine Transaktionen hinzugefügt. Beginnen Sie mit der Gründung eines Unternehmens.",
+    noTransactions: "Noch keine Transaktionen hinzugefügt. Beginnen Sie mit der Gründung eines Unternehmens über die 'Gründungs'-Transaktion.",
     addTransaction: "Transaktion hinzufügen",
     createFounding: "Unternehmen anlegen",
     addConvertible: "Wandelinstrument hinzufügen",
@@ -463,7 +566,7 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
     shareholders: "Gesellschafter",
     shareholderName: "Name des Gesellschafters",
     shareClass: "Anteilsklasse",
-    numberOfShares: "Anzahl Anteile",
+    numberOfShares: "Anzahl der Anteile",
     addShareholder: "Gesellschafter hinzufügen",
     investorName: "Name des Investors",
     investmentAmount: "Investitionssumme",
@@ -501,6 +604,7 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
     postMoneyValuation: "Post-Money-Bewertung",
     pricePerShare: "Preis pro Anteil",
     perShare: "pro Anteil",
+    search: "Transaktionen durchsuchen",
     searchPlaceholder: "Suche nach Firma, Investor, Gesellschafter...",
     noSearchResults: "Keine Transaktionen entsprechen Ihrer Suche.",
     status: "Status",
@@ -608,7 +712,7 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
     exitProceeds: "Exit-Erlös",
     transactionCosts: "Transaktionskosten",
     simulateWaterfall: "Waterfall simulieren",
-    waterfallResultsTitle: "Ergebnis der Waterfall-Verteilung ({currency})",
+    waterfallResultsTitle: "Ergebnis der Waterfall-Verteilung",
     initialInvestment: "Init. Invest.",
     fromDebtRepayment: "aus Darlehen",
     fromLiquidationPreference: "aus Präferenz",
@@ -622,24 +726,71 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
     calculationSteps: "Rechenschritte",
     showCalculationSteps: "Rechenschritte anzeigen",
     hideCalculationSteps: "Rechenschritte ausblenden",
+    lastRun: "Letzter Lauf",
+    notRunYet: "Noch nicht gelaufen",
+    
+    // Stakeholder Payout Summary
+    stakeholderPayoutSummaryTitle: "Zusammenfassung der Exit-Auszahlung",
+    totalPayout: "Gesamtauszahlung",
+    multipleOnInvestment: "Multiplikator (MOIC)",
+    percentageOfTotal: "% vom Gesamtbetrag",
+
 
     // Total Capitalization
-    totalCapitalizationTitle: "Gesamtkapitalisierungs-Übersicht ({currency})",
+    totalCapitalizationTitle: "Gesamtkapitalisierungs-Übersicht",
     instrument: "Instrument",
     instrumentType: "Typ",
-    amountOrShares: "Betrag / Anteile",
-    value: "Wert ({currency})",
+    amountOrShares: "Nominal Betrag / Anteile",
+    value: "Wert",
     equity: "Eigenkapital",
-    hybrid: "Hybrid",
+    hybrid: "Hybridkapital",
     debt: "Fremdkapital",
+    principalAmount: "Nennbetrag",
+    accruedInterest: "Aufgelaufene Zinsen",
     
     // Voting Simulation
     votingSimulationTitle: "Stimmrechts-Simulation",
     simulateVote: "Stimmrecht simulieren",
     votingResultsTitle: "Stimmrechtsverteilung",
     votes: "Stimmen",
-    totalVotes: "Stimmen Gesamt",
+    totalVotes: "Stimmen gesamt",
     noVoteYet: "Simulieren Sie die Stimmverteilung, um das Ergebnis zu sehen.",
+
+    // Cashflow View
+    cashflowViewTitle: "Cashflow-Übersicht",
+    description: "Beschreibung",
+    cashIn: "Einzahlung",
+    cashOut: "Auszahlung",
+    balance: "Saldo",
+    finalBalance: "Endsaldo",
+
+    // Project Assessment
+    projectAssessment: {
+      title: "Projekt-Bewertung & Einblicke",
+      analyzeProject: "Projekt analysieren",
+      noFindings: "Basierend auf dem aktuellen Regelwerk wurden keine spezifischen Probleme oder Best Practices gefunden. Bitte prüfen Sie manuell.",
+      noIssuesFoundTitle: "Sieht gut aus",
+      noIssuesFoundDesc: "Es wurden keine üblichen Warnungen oder kritischen Punkte basierend auf unserem Regelwerk erkannt. Die Projektstruktur scheint standardmäßig zu sein.",
+      findingFounderNoVestingTitle: "Gründer hat kein Vesting",
+      findingFounderNoVestingDesc: "Der Gründer '{stakeholderName}' hält Anteile ohne einen zugewiesenen Vesting-Plan. Dies ist ein erhebliches Warnsignal für Investoren, da es auf mangelndes langfristiges Engagement hindeuten kann.",
+      findingAggressiveLiqPrefTitle: "Aggressive Liquidationspräferenz",
+      findingAggressiveLiqPrefDesc: "Die Anteilsklasse '{shareClassName}' hat eine {factor}x Liquidationspräferenz, was höher ist als der Standard von 1x. Dies begünstigt diese Investoren bei einem Exit-Szenario stark.",
+      findingFullRatchetTitle: "Full Ratchet Verwässerungsschutz",
+      findingFullRatchetDesc: "Die Anteilsklasse '{shareClassName}' hat 'Full Ratchet'-Verwässerungsschutz. Dies ist eine sehr aggressive, investorenfreundliche Klausel, die Gründer und andere Gesellschafter in einer Down-Round stark verwässern kann.",
+      findingDownRoundTitle: "Down-Round erkannt",
+      findingDownRoundDesc: "Die Finanzierungsrunde '{roundName}' fand zu einer niedrigeren Pre-Money-Bewertung statt als die Post-Money-Bewertung der vorherigen Runde. Dies kann Verwässerungsschutzklauseln für frühere Investoren auslösen.",
+      findingStandardVestingTitle: "Standard-Gründer-Vesting angewendet",
+      findingStandardVestingDesc: "Die Verwendung eines 4-Jahres-Vesting-Plans mit einem 1-Jahres-Cliff für Gründer ist ein starker, anerkannter Branchenstandard, der die Interessen von Gesellschaftern und Investoren in Einklang bringt.",
+    },
+    
+    // Comparison View
+    comparisonViewTitle: "Projektvergleich",
+    compareProjects: "Projekte vergleichen",
+    startComparison: "Vergleich starten",
+    selectTwoProjects: "Wählen Sie zwei Projekte zum Vergleichen aus.",
+    printComparison: "Vergleich drucken",
+    projectA: "Projekt A",
+    projectB: "Projekt B",
 
     // Print & Export Results
     print: "Drucken",
@@ -651,16 +802,16 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
     importExport: "Import / Export",
     importExportTitle: "Daten importieren & exportieren",
     exportToJson: "Als JSON exportieren (Backup)",
-    exportDescription: "Laden Sie die Daten des aktiven Projekts in einem technischen JSON-Format herunter.",
+    exportDescription: "Laden Sie die Daten des aktiven Projekts in einem technischen JSON-Format zur Sicherung oder Weitergabe herunter.",
     exportAsExcelTemplate: "Als Excel-Vorlage exportieren",
-    exportAsExcelTemplateDescription: "Laden Sie die Daten des aktiven Projekts in einer Excel-Datei herunter, um sie zu bearbeiten oder neu zu importieren.",
+    exportAsExcelTemplateDescription: "Laden Sie die Projektdaten in einer Excel-Datei herunter. Diese kann bearbeitet und wieder importiert werden, um ein neues Szenario zu erstellen.",
     importFromExcel: "Aus Excel importieren",
-    importDescription: "Laden Sie eine Excel-Datei hoch, um ein neues Projekt zu erstellen. Verwenden Sie die exportierte Vorlage als Ausgangspunkt.",
-    importInstructionsTitle: "Benutzerfreundliche Excel-Struktur (4 Blätter):",
-    importSheetTransactions: "Blatt 'Transactions': Hauptliste der Ereignisse. Jede Zeile muss einen eindeutigen 'transactionName' haben. Bei Finanzierungsrunden nutzen Sie die Spalte 'convertsLoanTransactionNames', um die zu wandelnden Darlehen anzugeben.",
-    importSheetStakeholders: "Blatt 'Stakeholders': Listen Sie alle einzigartigen Personen/Entitäten auf. Jede muss eine eindeutige, benutzerdefinierte 'stakeholderId' haben, um Probleme mit doppelten Namen zu vermeiden.",
-    importSheetShareClasses: "Blatt 'ShareClasses': Definiert jede Anteilsklasse, verknüpft über den 'transactionName'.",
-    importSheetShareholdings: "Blatt 'Shareholdings': Verknüpft alles über 'transactionName', 'stakeholderId' und 'shareClassName'.",
+    importDescription: "Laden Sie eine Excel-Datei hoch, um ein neues Projekt zu erstellen. Nutzen Sie für beste Ergebnisse die exportierte Vorlage als Ausgangspunkt.",
+    importInstructionsTitle: "Anleitung zum Excel-Import",
+    importSheetTransactions: "Die Excel-Datei ist in mehrere Tabellenblätter aufgeteilt: 'Transactions', 'Stakeholders', 'ShareClasses', 'Shareholdings' und 'VestingSchedules'.",
+    importSheetStakeholders: "Jedes Blatt enthält einen Teil der gesamten Projektdaten. Das Blatt 'Transactions' ist die Hauptliste aller Ereignisse.",
+    importSheetShareClasses: "Die anderen Blätter enthalten die Detaildaten für jede Transaktion, verknüpft über eine 'transaction_id'.",
+    importSheetShareholdings: "Für einen zuverlässigen Arbeitsablauf wird dringend empfohlen, ein bestehendes Projekt nach Excel zu exportieren, um es als Vorlage zu verwenden. Dies stellt sicher, dass Ihre Datei die richtige Struktur und Spaltenüberschriften hat.",
     dropFileHere: "Excel-Datei hier ablegen oder zum Auswählen klicken",
     importSuccess: "Daten erfolgreich importiert!",
     importError: "Import fehlgeschlagen",
@@ -669,21 +820,23 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
     importDataFound: "Projekt '{projectName}' mit {countTransactions} Transaktionen und {countStakeholders} Gesellschaftern gefunden.",
     confirmImport: "Projekt erstellen",
     tryAgain: "Erneut versuchen",
-    importPreviewWarning: "Mit der Bestätigung wird ein neues Projekt mit diesen Daten erstellt.",
+    importPreviewWarning: "Mit der Bestätigung wird ein neues Projekt mit diesen Daten erstellt. Das aktuelle Projekt bleibt unberührt.",
 
     // Project Management
     projectsDashboard: "Projekt-Übersicht",
     createNewProject: "Neues Projekt erstellen",
     projectName: "Projektname",
-    enterProjectName: "Projektnamen eingeben...",
+    projectCurrency: "Projektwährung",
+    enterProjectName: "Geben Sie einen Namen für Ihr neues Projekt ein",
     create: "Erstellen",
     selectProject: "Projekt auswählen",
-    noProjects: "Noch keine Projekte vorhanden. Erstellen Sie eines, um zu beginnen!",
+    noProjects: "Noch keine Projekte vorhanden. Erstellen Sie eines oder laden Sie ein Beispielszenario, um zu beginnen!",
     backToDashboard: "Zurück zur Übersicht",
     confirmDeleteProjectTitle: "Projekt löschen?",
     confirmDeleteProjectMessage: "Sind Sie sicher, dass Sie das Projekt '{projectName}' löschen möchten? Dies ist endgültig und kann nicht rückgängig gemacht werden.",
     renameProject: "Projekt umbenennen",
     activeProject: "Aktives Projekt",
+    myProjectsTitle: "Meine Projekte & Szenarien",
     projectDashboardHintTitle: "Neu hier? Hier starten!",
     projectDashboardHintText: "Um die Funktionen der App ohne manuelle Dateneingabe zu erkunden, laden Sie am besten eines der untenstehenden Beispielszenarien. So sehen Sie schnell und einfach, was das Tool alles kann.",
     
@@ -695,27 +848,46 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
     fixedConversionPrice: "Fester Wandlungspreis ({currency} / Anteil)",
     ratioShares: "Anteile",
     forAmount: "für Betrag ({currency})",
+    
+    // Cash Payment Details
+    cashPaymentDetails: "Details zur Barzahlung",
+    baseInvestment: "Basis-Investment",
+    equalizationInterest: "Ausgleichszinsen",
+    totalCashPayment: "Gesamte Barzahlung",
+    totalPurchasePrice: "Gesamter Kaufpreis",
+    totalTransactionValue: "Gesamter Transaktionswert",
 
     // Help Tooltips
     help: {
+      date: "Das historische Datum der Transaktion (z.B. das Datum der Vertragsunterzeichnung). Es dient zur Sortierung des Transaktionsprotokolls.",
+      validFrom: "Das Stichtagsdatum, ab dem die Transaktion in allen Berechnungen (Cap Table, Waterfall) berücksichtigt wird. Dies ist das entscheidende Datum für die Simulation.",
+      validTo: "Ein optionales Enddatum für die Gültigkeit der Transaktion. Wenn es gesetzt ist, wird die Transaktion in Berechnungen nach diesem Datum ignoriert.",
       currency: "Geben Sie den 3-stelligen ISO-Code für die Hauptwährung des Projekts ein (z. B. EUR, USD). Diese wird für alle Finanzanzeigen in der gesamten Anwendung verwendet.",
-      preMoneyValuation: "Der Wert des Unternehmens, bevor in einer Finanzierungsrunde neues Geld investiert wird.",
+      preMoneyValuation: "Der Wert des Unternehmens *vor* der Investition von neuem Geld. Es ist eine verhandelte Größe und die Grundlage für die Berechnung des Anteilspreises für neue Investoren. Es ist *nicht* automatisch die Post-Money-Bewertung der vorherigen Runde, da sich der Unternehmenswert aufgrund von Leistung oder Marktbedingungen ändern kann.",
       valuationCap: "Eine Obergrenze für die Bewertung, zu der ein Wandelinstrument in Eigenkapital umgewandelt wird. Der Investor erhält den besseren Deal zwischen Bewertungsobergrenze und Discount.",
       discount: "Ein prozentualer Nachlass auf den Preis pro Aktie der Finanzierungsrunde, zu dem das Wandelinstrument umgewandelt wird.",
+      liquidationPreferenceRank: "Definiert die Auszahlungsreihenfolge bei einer Liquidation. Rang 1 wird zuerst ausbezahlt, dann Rang 2 usw. Stammanteile (Common Stock) haben Rang 0.",
       liquidationPreferenceType: "NON_PARTICIPATING: Erhält Präferenz oder wandelt in Stammaktien (wählt das Bessere). FULL_PARTICIPATING: Erhält Präferenz UND partizipiert mit Stammaktien. CAPPED_PARTICIPATING: Erhält Präferenz und partizipiert bis eine Gesamtrendite-Obergrenze erreicht ist.",
+      liquidationPreferenceFactor: "Der Multiplikator der Investition, den ein Investor vor anderen zurückerhält (z.B. 1x, 2x). Ein 1x-Faktor bedeutet, dass er sein Geld zurückbekommt; ein 2x-Faktor bedeutet, dass er das Doppelte seiner Investition zurückbekommt, bevor andere Ausschüttungen erfolgen.",
       participationCapFactor: "Bei 'Capped Participating'-Präferenz ist dies der Gesamtrendite-Multiplikator (z.B. 3x), den ein Investor erhalten kann. Beinhaltet die ursprüngliche Präferenz.",
-      antiDilutionProtection: "Schützt frühere Investoren vor Verwässerung, wenn eine zukünftige Finanzierungsrunde zu einer niedrigeren Bewertung ('Down-Round') stattfindet. 'Full Ratchet' ist die stärkste Form.",
+      antiDilutionProtection: "Schützt frühere Investoren vor Verwässerung, wenn eine zukünftige Finanzierungsrunde zu einer niedrigeren Bewertung ('Down-Round') stattfindet. 'Full Ratchet' ist die stärkste Form, während 'Broad-based' üblicher ist.",
       vestingCliff: "Eine Periode zu Beginn eines Vesting-Plans, während der keine Anteile unverfallbar werden. Endet das Arbeitsverhältnis vor dem Cliff, werden keine Anteile gewährt.",
       shareTransfer: "Modelliert eine 'Secondary Transaction', bei der ein bestehender Anteilseigner seine Anteile an einen anderen (neuen oder bestehenden) Anteilseigner verkauft. Diese Transaktion weist Eigentum neu zu, ohne neue Anteile aus der Gesellschaftskasse auszugeben.",
+      additionalPayment: "Dient zur Erfassung von zusätzlichen Barzahlungen im Zusammenhang mit der Anteilsübertragung, wie z.B. einer Ausgleichszahlung oder einem Sonderbonus. Dieser Betrag beeinflusst nicht die Anteilsberechnung, wird aber für die finanzielle Nachverfolgung erfasst.",
       vestingSchedules: "Vesting-Pläne definieren, wie der Besitz von Anteilen über die Zeit verdient wird, typischerweise für Gründer und Mitarbeiter, um deren langfristiges Engagement sicherzustellen. Ein Plan umfasst eine Gesamt-Vesting-Periode (z.B. 48 Monate) und oft einen 'Cliff' (z.B. 12 Monate). Vor Erreichen des Cliffs werden keine Anteile zugeteilt. Nach dem Cliff wird ein Teil unverfallbar, der Rest üblicherweise monatlich. 'Vested Shares' bestimmen den Eigentumsanteil in Berechnungen wie Stimmrecht und Waterfall-Simulationen.",
       shareholdings: "Listen Sie alle anfänglichen Gesellschafter, ihre Anzahl an Anteilen und das anfängliche Investment auf. Der 'Preis pro Anteil' wird automatisch aus Investment und Anteilen berechnet. Sie können einem Gesellschafter einen Vesting-Plan zuweisen, was bei Gründern oder Mitarbeitern üblich ist.",
-      initialShareClasses: "Definieren Sie die anfänglichen Anteilsklassen des Unternehmens. Bei der Gründung ist dies typischerweise 'Common Stock' (Stammanteile) mit einer Stimme pro Anteil und ohne besondere Vorrechte. Komplexere Anteilsklassen werden meist in späteren Finanzierungsrunden eingeführt.",
+      initialShareClasses: "Definieren Sie die initialen Anteilsklassen des Unternehmens. Bei der Gründung ist dies typischerweise 'Common Stock' (Stammanteile) mit einer Stimme pro Anteil und ohne besondere Vorrechte. Komplexere Anteilsklassen werden meist in späteren Finanzierungsrunden eingeführt.",
       convertibleLoan: "Ein Wandeldarlehen (oder Convertible Note) ist eine kurzfristige Schuld, die sich typischerweise in einer zukünftigen Finanzierungsrunde in Eigenkapital umwandelt. Es ist eine übliche Methode für junge Unternehmen, schnell Kapital aufzunehmen. Wählen Sie den Wandlungsmechanismus, der Ihrem Vertrag entspricht.",
+      seniority: "Bestimmt die Rückzahlungspriorität bei einer Liquidation. Senior-Schulden werden vor nachrangigen Schulden beglichen. Wandeldarlehen sind typischerweise 'nachrangig' (Subordinated), was bedeutet, dass sie nach Senior-Bankdarlehen, aber vor den Eigenkapitalgebern bezahlt werden.",
+      debtSeniority: "Bestimmt die Rückzahlungspriorität bei einer Liquidation. *Besichert (Senior)* ist durch Sicherheiten gedeckt und wird zuerst bezahlt. *Unbesichert (Senior)* folgt danach. *Nachrangige* Schulden werden zuletzt, vor allen Eigenkapitalgebern, beglichen.",
+      interestOnDebt: "Dieser Zinssatz wird in der Waterfall-Simulation verwendet. Aufgelaufene einfache Zinsen werden vom Startdatum des Darlehens bis zum Simulationsdatum berechnet. Diese Zinsen werden zum Hauptdarlehensbetrag addiert, und die Gesamtsumme wird dem Kreditgeber entsprechend seinem Rang zurückgezahlt, bevor Erlöse an die Eigenkapitalgeber verteilt werden.",
       conversionMechanism: "Definiert, wie das Darlehen in Anteile umgewandelt wird. 'Cap & Discount' ist typisch für VC-Deals. 'Fester Preis' verwendet einen vordefinierten Preis pro Anteil. 'Festes Verhältnis' definiert eine feste Anzahl von Anteilen pro investiertem Betrag.",
       fixedPrice: "Das Darlehen wird zu genau diesem Preis pro Anteil in Anteile umgewandelt, unabhängig von der Bewertung in der Finanzierungsrunde.",
       fixedRatio: "Das Darlehen wird auf der Grundlage eines festgelegten Verhältnisses umgewandelt. Zum Beispiel bedeutet '1 Anteil für Betrag 1000', dass der Investor für jeden investierten Betrag in der Projektwährung einen Anteil erhält.",
       financingRoundDetails: "Geben Sie die zentralen Finanzdaten der Runde ein. Die Pre-Money-Bewertung ist der Wert des Unternehmens *vor* diesem neuen Investment. Der Preis pro Anteil für neue Investoren wird basierend auf dieser Bewertung und der Anzahl der vor der Runde ausgegebenen Anteile berechnet.",
       newShareClassDetailsFinancing: "Definieren Sie die neue Anteilsklasse, die an Investoren dieser Runde ausgegeben wird (z.B. 'Series A Preferred'). Diese Anteile haben oft Sonderrechte wie Liquidationspräferenzen (erste Rückzahlung bei einem Exit), Verwässerungsschutz (Schutz vor zukünftigen 'Down-Rounds') und andere Stimmrechte.",
+      votesPerShare: "Die Anzahl der Stimmen, die diese Anteilsklasse pro Anteil gewährt. Kann zur Schaffung von Mehrstimmrechtsanteilen (z.B. 10 Stimmen pro Anteil) für Gründer verwendet werden, um die Kontrolle zu behalten.",
+      protectiveProvisions: "Sonderrechte, die einer Anteilsklasse ein Vetorecht bei bestimmten Unternehmensentscheidungen geben, wie z.B. dem Verkauf des Unternehmens, der Änderung des Vorstands oder der Ausgabe vorrangigerer Anteile. Geben Sie diese als kommagetrennten Text ein.",
       newInvestors: "Listen Sie die neuen Investoren dieser Runde und ihre jeweiligen Investments auf. Die Anzahl der Anteile, die sie erhalten, wird automatisch basierend auf dem Preis pro Anteil berechnet, der sich aus der Pre-Money-Bewertung ergibt.",
       convertedLoans: "Wählen Sie alle existierenden Wandeldarlehen aus, die in dieser Finanzierungsrunde in Eigenkapital umgewandelt werden sollen. Der Darlehensbetrag plus aufgelaufene Zinsen wird in Anteile der neuen Klasse umgewandelt, basierend auf den spezifischen Bedingungen des Darlehens (Valuation Cap, Discount).",
       debtInstrument: "Erfassen Sie nicht wandelbares Fremdkapital, wie z.B. Bankdarlehen. Der Rang ('Senior Besichert', 'Senior Unbesichert', 'Nachrangig') ist entscheidend, da er die Reihenfolge der Rückzahlung bei einer Liquidation bestimmt, bevor Eigenkapitalgeber Erlöse erhalten.",
@@ -723,16 +895,44 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
       equalizationPurchase: "Modelliert eine Transaktion, bei der ein neuer Investor zu einem späteren Zeitpunkt einsteigt, aber wirtschaftlich so behandelt werden möchte, als hätte er früher investiert. Dies wird erreicht, indem der ursprüngliche Anteilspreis zuzüglich eines berechneten Zinsbetrags gezahlt wird, um den Einstieg 'auszugleichen'.",
       purchaseDetails: "Die Kerndetails des Anteilskaufs. Ähnlich einer sekundären Transaktion, aber mit einer Ausgleichskomponente.",
       equalizationDetails: "Definiert die Zinsberechnung, um diese Investition mit einer früheren gleichzustellen. Wählen Sie die Transaktion (z.B. eine frühere Finanzierungsrunde), auf die dieser Kauf für die Zinsberechnung zurückdatiert werden soll.",
-      equalizationInterestRate: "Der jährliche Zinssatz zur Berechnung der Zusatzzahlung, die erforderlich ist, um diesen späten Einstieg mit einer früheren Investition 'auszugleichen'."
+      equalizationInterestRate: "Der jährliche Zinssatz zur Berechnung der Zusatzzahlung, die erforderlich ist, um diesen späten Einstieg mit einer früheren Investition 'auszugleichen'.",
+      exitProceeds: "Der Gesamtbetrag, der aus dem Verkauf des Unternehmens erzielt wird, bevor Gebühren oder Kosten abgezogen werden. Dieses Feld ist für die Simulation erforderlich.",
+      transactionCosts: "Alle mit dem Verkauf verbundenen Kosten, wie z.B. Gebühren für Investmentbanking oder Anwaltskosten, die vor der Verteilung an die Anteilseigner vom Verkaufserlös abgezogen werden."
     },
 
     // User Guide
-    userGuideTitle: "Anleitung & Beispielfälle",
+    userGuideTitle: "Anleitung & Beispielszenarien",
     showGuide: "Anleitung & Beispiele anzeigen",
     hideGuide: "Anleitung & Beispiele ausblenden",
     tabHowItWorks: "So funktioniert's",
     tabUseCases: "Anwendungsfälle",
     tabSampleScenarios: "Beispielszenarien",
+    tabFaq: "FAQ",
+    faq: {
+      title: "Häufig gestellte Fragen (FAQ)",
+      q1Title: "Wie ist diese Anwendung zu verstehen?",
+      q1Answer: "Bei der Applikation handelt es sich um eine Simulationssoftware, die z.B. in der Business-Analyse zur Generierung eines besseren Verständnisses zwischen Business-Anforderung und technischer Implementierung eingesetzt wird. Sie enthält daher einige Vereinfachungen und ist nicht für den produktiven, realen Finanzmanagement-Einsatz vorgesehen.",
+      q2Title: "Ist das System mehrwährungsfähig?",
+      q2Answer: "Auf eine Mehrwährungsfähigkeit wurde bewusst verzichtet, um die Entwicklung des Simulators schlank zu halten und sich auf die funktionalen Abläufe zu konzentrieren. Aufgrund der modularen Architektur wäre eine Erweiterung bei Bedarf jedoch eine umsetzbare Option.",
+      q3Title: "Was ist der Unterschied zwischen 'Datum', 'Gültig von' und 'Gültig bis'?",
+      q3Answer: "Diese Trennung ermöglicht eine präzise, realitätsnahe Modellierung. 'Datum' ist das historische Belegdatum (z.B. wann ein Vertrag unterzeichnet wurde) und sortiert das Transaktionsprotokoll. 'Gültig von' ist das wichtigste Datum für den Simulator; es ist der Stichtag, ab dem die finanziellen Auswirkungen einer Transaktion beginnen. Alle Berechnungen basieren auf dem von Ihnen gewählten 'Simulationsstichtag' und berücksichtigen nur Transaktionen, bei denen 'Gültig von' an oder vor diesem Datum liegt. 'Gültig bis' ist ein optionales Ablaufdatum.",
+      q4Title: "Wo werden meine Daten gespeichert? Sind sie sicher?",
+      q4Answer: "Ihre Daten werden ausschließlich im lokalen Speicher (`localStorage`) Ihres Browsers gespeichert. Sie werden niemals an einen Server gesendet. Das bedeutet, Ihre Daten sind so sicher wie Ihr Computer und Sie haben die volle Kontrolle. Es bedeutet aber auch, dass Sie für Backups mit der Exportfunktion selbst verantwortlich sind, da die Daten nicht auf anderen Geräten verfügbar sind.",
+      q5Title: "Wie kann ich ein Szenario mit einem Kollegen teilen?",
+      q5Answer: "Der einfachste Weg, ein Projekt zu teilen, ist die 'Import / Export'-Funktion. Exportieren Sie Ihr Projekt als JSON-Datei. Diese Datei enthält alle Transaktionsdaten und kann an Ihren Kollegen gesendet werden, der sie dann in seinen eigenen Simulator importieren kann.",
+      q6Title: "Wie genau sind die Finanzberechnungen?",
+      q6Answer: "Die Berechnungen sind darauf ausgelegt, gängige Szenarien basierend auf Standardbedingungen genau zu modellieren. Sie enthalten jedoch gewisse Vereinfachungen. Beispielsweise geht die Wasserfall-Simulation davon aus, dass Inhaber von nicht-partizipierenden Vorzugsanteilen immer die wirtschaftlich bessere Option wählen (wandeln oder Präferenz nehmen), modelliert aber keine individuellen Aktionärsentscheidungen. Das Tool dient zu Bildungs- und Modellierungszwecken und ist kein Ersatz für professionelle Rechts- oder Finanzberatung.",
+      q7Title: "Wie wirkt sich das Vesting von Anteilen auf die Simulationen aus?",
+      q7Answer: "Vesting ist entscheidend. Die Cap Table zeigt Ihre Gesamtanteile, aber die Stimmrechts-Simulation basiert nur auf Ihren *erdienten* ('vested') Anteilen zum Simulationsstichtag. Ebenso nehmen bei einer Wasserfall-Analyse nicht erdiente Anteile typischerweise nicht am Erlös teil, da sie an das Unternehmen zurückfallen. Nur erdiente Anteile werden berücksichtigt. Dies modelliert korrekt das Prinzip, dass Ihnen nur das gehört, was bereits erdient ist.",
+      q8Title: "Wie kann ich Feedback geben?",
+      q8Answer: "Diese Anwendung wird kontinuierlich weiterentwickelt. Wenn Sie Feedback, Verbesserungsvorschläge oder einen Fehler gefunden haben, senden Sie bitte eine E-Mail an kontakt@jodecon.de. Wir freuen uns über Ihre Mithilfe!",
+      q9Title: "Verwendet die 'Projekt-Bewertung' eine KI? Werden meine Daten an einen Server gesendet?",
+      q9Answer: "Nein, die Projekt-Bewertung verwendet **keine** Cloud-basierte KI und Ihre Daten werden **niemals** an einen Server gesendet. Um Ihre Privatsphäre zu schützen, ist diese Funktion eine regelbasierte Engine, die vollständig in Ihrem Browser läuft. Sie analysiert die Struktur Ihres Projekts anhand eines vordefinierten Satzes von üblichen Risikokapital-Standards und Best Practices. Für ein Simulations-Tool garantiert dieser Ansatz Privatsphäre und Geschwindigkeit. Ein Produktivsystem könnte andere Technologien verwenden.",
+      q10Title: "Wie kann ich zwei verschiedene Szenarien vergleichen?",
+      q10Answer: "Klicken Sie auf der Haupt-Projektübersicht auf den Button **'Projekte vergleichen'**. Dies aktiviert einen Auswahlmodus. Markieren Sie die Kästchen neben den beiden Projekten, die Sie vergleichen möchten, und klicken Sie dann auf **'Vergleich starten'**. Dies öffnet eine Gegenüberstellung, in der Sie dasselbe Simulationsdatum und dieselben Waterfall-Eingaben auf beide Szenarien gleichzeitig anwenden können, um die Ergebnisunterschiede zu sehen.",
+      q11Title: "Was ist die 'Zusammenfassung der Exit-Auszahlung'?",
+      q11Answer: "Die 'Waterfall-Verteilung' liefert eine detaillierte, schrittweise Aufschlüsselung, wie die Exit-Erlöse auf die verschiedenen Auszahlungstranchen (Schulden, Vorzugsanteile usw.) verteilt werden. Die 'Zusammenfassung der Exit-Auszahlung' ergänzt dies durch eine übergeordnete Übersicht, die all diese Auszahlungen für jeden Anteilseigner zusammenfasst. Sie gibt Ihnen eine klare, endgültige Antwort auf die Frage 'Wer bekommt insgesamt wie viel?' und zeigt zudem den Renditemultiplikator (MOIC) für die Investition jedes Anteilseigners."
+    },
     howItWorks: {
         title: "So funktioniert der Equity Scenario Simulator",
         intro: "Diese Anwendung hilft Ihnen, Unternehmensbeteiligungen zu modellieren und zu verstehen. Sie funktioniert in drei Hauptschritten: Dateneingabe, Berechnung und Simulation. Alle Daten bleiben auf Ihrem Gerät.",
@@ -743,7 +943,7 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
         step3Title: "Schritt 3: Cap Table analysieren",
         step3Text: "Die Kapitalisierungstabelle (Cap Table) zeigt, wem welcher prozentuale Anteil am Unternehmen zu einem bestimmten Zeitpunkt gehört. Verwenden Sie den 'Simulationsstichtag'-Wähler, um die Cap Table zu jedem Zeitpunkt in der Vergangenheit oder Zukunft anzuzeigen. Die Tabelle berücksichtigt automatisch alle 'aktiven' Transaktionen bis zu diesem Datum.",
         step4Title: "Schritt 4: Simulationen durchführen",
-        step4Text: "Die wahre Stärke des Tools liegt in den Simulationen. Die Wasserfallanalyse zeigt, wie die Erlöse aus einem Unternehmensverkauf auf alle Beteiligten verteilt würden, unter Berücksichtigung von Schulden-Rangfolgen und Liquidationspräferenzen. Die Stimmrechts-Simulation zeigt die Verteilung der Stimmrechte basierend auf den gevesteten Anteilen."
+        step4Text: "Die wahre Stärke des Tools liegt in den Simulationen. Die Wasserfallanalyse zeigt, wie die Erlöse aus einem Unternehmensverkauf auf alle Beteiligten verteilt würden, unter Berücksichtigung von Schulden-Rangfolgen und Liquidationspräferenzen. Die Stimmrechts-Simulation zeigt die Verteilung der Stimmrechte basierend auf den erdienten Anteilen."
     },
     loadScenario: "Dieses Szenario laden",
     sampleScenarios: "Beispielszenarien",
@@ -767,7 +967,7 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
         uc05Goal: "Simulieren, wie ein Verkaufserlös unter Berücksichtigung der gesamten Kapitalstruktur (Senior Debt, Wandelanleihen, Präferenzen) verteilt wird.",
         uc05Features: "Waterfall-Simulation, Darlehen, Rang",
         uc06Title: "UC-06: Governance- & Kontroll-Analyse",
-        uc06Goal: "Die historische Entwicklung der Stimmrechte nach jeder Transaktion nachvollziehen, um zu verstehen, wann und wie sich Kontrollverhältnisse verschoben haben.",
+        uc06Goal: "Die historische Entwicklung der Stimmrechte nachvollziehen, um zu verstehen, wann und wie sich Kontrollverhältnisse verschoben haben.",
         uc06Features: "Stimmrechts-Simulation, Historische Analyse",
         uc07Title: "UC-07: Modellierung von Secondaries",
         uc07Goal: "Eine Anteilsübertragung zwischen Gesellschaftern (z.B. ein Gründer verkauft Anteile an einen neuen Investor) korrekt in der Cap Table abbilden.",
@@ -778,6 +978,9 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
         uc09Title: "UC-09: Onboarding & Lernprozess",
         uc09Goal: "Mithilfe von vordefinierten Beispielszenarien und einer kontextsensitiven Hilfe die Funktionsweise komplexer Klauseln verstehen und das Tool schnell erlernen.",
         uc09Features: "Anleitung, Tooltips, Beispielszenarien",
+        uc10Title: "UC-10: A/B-Szenario-Tests",
+        uc10Goal: "Zwei verschiedene Finanzierungsstrategien oder Unternehmensstrukturen direkt nebeneinander vergleichen, um die Auswirkungen auf die Cap Table und den Exit-Wasserfall zu analysieren.",
+        uc10Features: "Projektvergleichsansicht",
     },
     scenarioSeedRoundTitle: "Szenario 1: Typische Seed-Runde",
     scenarioSeedRoundDescription: "Demonstriert eine Unternehmensgründung, ein Wandeldarlehen von einem Angel-Investor und eine anschließende Seed-Finanzierungsrunde, die das Darlehen wandelt. Beinhaltet einen Vesting-Plan für einen Gründer.",
@@ -787,6 +990,8 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
     scenarioAdvancedWaterfallDescription: "Demonstriert eine Waterfall-Simulation mit besicherten und nachrangigen Darlehen, um die korrekte Rückzahlungshierarchie vor der Eigenkapitalverteilung zu zeigen.",
     scenarioGovernanceTitle: "Szenario 4: Governance & Secondaries",
     scenarioGovernanceDescription: "Illustriert eine Anteilsübertragung (Secondary) von einem Gründer an einen neuen Investor, kombiniert mit einer Anpassung der Stimmrechte zur Schaffung einer Super-Majority.",
+    scenarioEqualizationTitle: "Szenario 5: Später Einstieg mit Ausgleichszahlung",
+    scenarioEqualizationDescription: "Zeigt, wie ein Investor später einsteigen, aber die gleichen wirtschaftlichen Bedingungen wie in einer früheren Runde erhalten kann, indem er eine zusätzliche Ausgleichszahlung basierend auf einem Zinssatz leistet.",
 
     // Workflow Diagram
     workflowTitle: "Unternehmens-Lebenszyklus",
@@ -818,11 +1023,14 @@ without a written agreement with Jörn Densing, Wachtberg (Deutschland).
     increaseFontSizeTooltip: "Schriftgröße vergrößern",
     themeClassicTooltip: "Klassisches Design",
     themeModernTooltip: "Modernes Design",
-    themeContrastTooltip: "Hoher Kontrast Design",
+    themeContrastTooltip: "Design mit hohem Kontrast",
+    expand: "Erweitern",
+    collapse: "Einklappen",
 
     // Legal & Footer
     footer: {
       legalNotice: "Impressum, Datenschutz & Disclaimer",
+      version: "Version",
     },
     legal: {
       title: "Rechtliche Hinweise",
@@ -843,19 +1051,19 @@ Alle von Ihnen eingegebenen Daten werden ausschließlich im lokalen Speicher (\`
 
 **3. Datenverfügbarkeit und Sicherung**
 - **Gerätespezifisch:** Die im \`localStorage\` gespeicherten Daten sind an den spezifischen Browser und das spezifische Gerät gebunden, das Sie verwenden. Daten werden **nicht** automatisch zwischen verschiedenen Computern oder Browsern synchronisiert.
-- **Sicherung durch den Nutzer:** Um ein Szenario zu sichern oder auf ein anderes Gerät zu übertragen, können Sie die Funktion 'Als JSON exportieren (Backup)' nutzen. Da die Anwendung ohne Garantie auf Verfügbarkeit oder Support bereitgestellt wird (siehe Haftungsausschluss), liegt die Sicherung von für Sie wichtigen Daten in Ihrer alleinigen Verantwortung.
+- **Sicherung durch den Nutzer:** Um ein Szenario zu sichern oder auf ein anderes Gerät zu übertragen, müssen Sie die Funktion 'Als JSON exportieren (Backup)' nutzen. Da die Anwendung ohne Garantie auf Verfügbarkeit oder Support bereitgestellt wird (siehe Haftungsausschluss), liegt die Sicherung von für Sie wichtigen Daten in Ihrer alleinigen Verantwortung.
 
 **4. Löschung Ihrer Daten**
 Sie haben die vollständige Kontrolle über die Löschung Ihrer Daten durch Funktionen innerhalb der App oder durch das Löschen der Websitedaten Ihres Browsers.
 
 **5. Dienste von Drittanbietern**
-Diese Anwendung verwendet öffentliche Content Delivery Networks (CDNs), um notwendige Bibliotheken wie XLSX.js zu laden. Dies kann dazu führen, dass Ihr Browser diese Drittanbieter-Server kontaktiert, um diese Dateien herunterzuladen.
+Diese Anwendung verwendet öffentliche Content Delivery Networks (CDNs), um notwendige Bibliotheken wie React und SheetJS (xlsx) zu laden. Dies kann dazu führen, dass Ihr Browser diese Drittanbieter-Server kontaktiert, um diese Dateien herunterzuladen.
 `,
       disclaimerTitle: "Disclaimer & Lizenz",
       disclaimerText: `**Haftungs- und Gewährleistungsausschluss**
 Diese Anwendung wird als kostenloses Werkzeug für Simulationszwecke "wie besehen" zur Verfügung gestellt. Die Ergebnisse basieren auf den von Ihnen bereitgestellten Daten und stellen keine Finanz-, Rechts- oder Steuerberatung dar.
 
-Die Nutzung dieses Tools erfolgt auf Ihr eigenes Risiko. Der Betreiber übernimmt keinerlei Haftung für die Richtigkeit, Vollständigkeit oder Aktualität der Simulationen, oder für direkte oder indirekte Schäden, die aus der Nutzung der Anwendung entstehen.
+Die Nutzung dieses Tools erfolgt auf Ihr eigenes Risiko. Der Betreiber übernimmt keinerlei Haftung für die Richtigkeit, Vollständigkeit oder Aktualität der Simulationen oder für direkte oder indirekte Schäden, die aus der Nutzung der Anwendung entstehen.
 
 Es wird kein Support für die Anwendung geleistet und es gibt keine Garantie für die langfristige Verfügbarkeit, Funktionalität oder Fehlerfreiheit des Dienstes.
 
@@ -867,7 +1075,7 @@ Copyright (c) 2025 Jörn Densing, Wachtberg (Deutschland)
 
 Alle Rechte vorbehalten.
 
-Die Erlaubnis, diese Software und ihre Dokumentation für beliebige Zwecke und ohne Gebühr zu nutzen, zu kopieren, zu modifizieren und zu verbreiten, wird hiermit ohne eine schriftliche Vereinbarung mit Jörn Densing, Wachtberg (Deutschland), untersagt.
+Die Nutzung, Vervielfältigung, Änderung und Verbreitung dieser Software und ihrer Dokumentation für jegliche Zwecke und ohne Gebühr sind ohne eine schriftliche Vereinbarung mit Jörn Densing, Wachtberg (Deutschland), untersagt.
 `,
     },
   },

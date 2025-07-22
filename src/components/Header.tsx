@@ -1,11 +1,11 @@
 
-
 import type { FontSize, Theme } from '../types';
 import ContrastIcon from '../styles/icons/ContrastIcon';
 import TextSizeIcon from '../styles/icons/TextSizeIcon';
 import SparklesIcon from '../styles/icons/SparklesIcon';
 import SunIcon from '../styles/icons/SunIcon';
 import { useLocalization } from '../contexts/LocalizationContext';
+import LogoIcon from '../styles/icons/LogoIcon';
 
 interface HeaderProps {
   onOpenImportExportModal: () => void;
@@ -26,15 +26,22 @@ function Header({ onOpenImportExportModal, theme, setTheme, onIncreaseFontSize, 
         : 'bg-surface text-secondary hover:bg-background-subtle'
     }`;
 
-  const accessibilityButtonClasses = "p-2 rounded-md transition-colors text-secondary hover:bg-background-subtle focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive";
+  const baseAccessibilityButtonClasses = "p-2 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive";
+  
+  const accessibilityButtonClasses = `${baseAccessibilityButtonClasses} text-secondary hover:bg-background-subtle`;
   
   const themeButtonClasses = (buttonTheme: Theme) => 
-    `${accessibilityButtonClasses} ${theme === buttonTheme ? 'bg-interactive text-on-interactive' : ''}`;
+    `${baseAccessibilityButtonClasses} ${
+      theme === buttonTheme 
+      ? 'bg-interactive text-on-interactive hover:bg-interactive-hover' 
+      : 'text-secondary hover:bg-background-subtle'
+    }`;
 
   return (
     <header className="bg-surface shadow-md p-4 mb-8">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <div>
+        <div className="flex items-center gap-4">
+          <LogoIcon className="h-10 w-auto" />
           <h1 className="text-3xl font-bold text-primary">{translations.appTitle}</h1>
         </div>
         <div className="flex items-center gap-4">

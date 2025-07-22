@@ -9,16 +9,14 @@ interface VotingViewProps {
   onPrint: () => void;
   onExport: (format: 'png'|'pdf') => void;
   containerId: string;
+  lastRun: string | null;
 }
 
-function VotingView({ result, onPrint, onExport, containerId }: VotingViewProps) {
+function VotingView({ result, onPrint, onExport, containerId, lastRun }: VotingViewProps) {
   const { t: translations, locale } = useLocalization();
   
   const content = result ? (
     <div className="space-y-4">
-        <p className="text-sm text-secondary">
-            {translations.asOfDate}: {new Date(result.asOfDate).toLocaleDateString(locale)}
-        </p>
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-subtle">
                 <thead className="bg-background-subtle">
@@ -58,7 +56,14 @@ function VotingView({ result, onPrint, onExport, containerId }: VotingViewProps)
   return (
     <div id={containerId} className="bg-surface p-4 sm:p-6 rounded-lg shadow-sm border border-subtle">
         <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-primary">{translations.votingResultsTitle}</h3>
+            <div>
+                <h3 className="text-lg font-semibold text-primary">{translations.votingResultsTitle}</h3>
+                {lastRun && 
+                    <p className="text-sm text-secondary">
+                        {translations.lastRun}: {lastRun}
+                    </p>
+                }
+            </div>
             <ResultCardActions onPrint={onPrint} onExport={onExport} />
         </div>
         {content}

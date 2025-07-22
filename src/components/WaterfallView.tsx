@@ -113,7 +113,7 @@ function WaterfallView({ result, onPrint, onExport, containerId }: WaterfallView
   return (
     <div id={containerId} className="bg-surface p-4 sm:p-6 rounded-lg shadow-sm border border-subtle">
         <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-primary">{translations.waterfallResultsTitle.replace('{currency}', projectCurrency)}</h3>
+            <h3 className="text-lg font-semibold text-primary">{translations.waterfallResultsTitle}</h3>
             <ResultCardActions onPrint={onPrint} onExport={onExport} />
         </div>
         {content}

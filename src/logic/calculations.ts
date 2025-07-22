@@ -1,3 +1,5 @@
+
+
 import type {
   Transaction,
   ShareClass,
@@ -11,9 +13,20 @@ import type {
   VoteDistributionEntry,
   WaterfallResult,
   WaterfallDistribution,
-  FinancingRoundTransaction
+  FinancingRoundTransaction,
+  TotalCapitalizationResult,
+  TotalCapitalizationEntry,
+  CashflowResult,
+  CashflowEntry,
+  EqualizationPurchaseTransaction,
+  FoundingTransaction,
+  ProjectAssessmentResult,
+  AssessmentFinding,
+  StakeholderPayoutSummaryResult,
+  StakeholderPayoutSummaryEntry
 } from '../types';
 import { TransactionType, ConversionMechanism, TransactionStatus } from '../types';
+import type { Translations } from '../i18n';
 
 export const getShareClassesAsOf = (transactions: Transaction[], asOfDate: string): Map<string, ShareClass> => {
     const asOf = new Date(asOfDate);
@@ -158,6 +171,14 @@ export const calculateCapTable = (
                 const capTableBefore = calculateCapTable(transactions, roundTx.date, roundTx.id);
                 const pps = capTableBefore.totalShares > 0 ? roundTx.preMoneyValuation / capTableBefore.totalShares : 0;
                 
+                // If shares are not pre-calculated in the transaction, calculate them now.
+                roundTx.newShareholdings.forEach(sh => {
+                    if (!sh.shares && sh.investment && pps > 0) {
+                        sh.shares = Math.round(sh.investment / pps);
+                        sh.originalPricePerShare = pps;
+                    }
+                });
+
                 // Anti-Dilution Calculations
                 const antiDilutionAdjustments: Shareholding[] = [];
                 if (pps > 0) {
@@ -382,9 +403,11 @@ export const simulateWaterfall = (
     language: string
 ): WaterfallResult => {
     const calculationLog: string[] = [];
+    const formatCurrency = (val: number) => val.toLocaleString(language, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
     const netExitProceeds = exitProceeds - transactionCosts;
     let remainingProceeds = netExitProceeds;
-    calculationLog.push(`Starting with Net Exit Proceeds of ${netExitProceeds.toLocaleString(language)}`);
+    calculationLog.push(`Start: Net Exit Proceeds = ${formatCurrency(exitProceeds)} - ${formatCurrency(transactionCosts)} = ${formatCurrency(netExitProceeds)}`);
 
     const activeTxs = transactions.filter(tx => tx.status === TransactionStatus.ACTIVE && new Date(tx.date) <= new Date(capTable.asOfDate));
     const allShareClasses = getShareClassesAsOf(activeTxs, capTable.asOfDate);
@@ -407,7 +430,8 @@ export const simulateWaterfall = (
         });
     });
     
-    // 1. Debt Repayment
+    // --- 1. Debt Repayment ---
+    calculationLog.push(`--- Phase 1: Debt Repayment ---`);
     const debtInstruments = activeTxs.filter(tx => tx.type === TransactionType.DEBT_INSTRUMENT) as DebtInstrumentTransaction[];
     debtInstruments.sort((a, b) => {
         const order = { 'SENIOR_SECURED': 1, 'SENIOR_UNSECURED': 2, 'SUBORDINATED': 3 };
@@ -420,7 +444,7 @@ export const simulateWaterfall = (
         const amountToRepay = debt.amount + interest;
         const payment = Math.min(remainingProceeds, amountToRepay);
 
-        let debtDist = Array.from(distributions.values()).find(d => d.stakeholderName === debt.lenderName); // Simplified assumption
+        let debtDist = Array.from(distributions.values()).find(d => d.stakeholderName === debt.lenderName);
         if(!debtDist) {
             const key = `debt-${debt.id}`;
             distributions.set(key, { stakeholderId: key, stakeholderName: debt.lenderName, shareClassId: 'debt', shareClassName: 'Debt', initialInvestment: debt.amount, fromDebtRepayment: 0, fromLiquidationPreference: 0, fromParticipation: 0, fromConvertedShares: 0, totalProceeds: 0, multiple: 0 });
@@ -429,10 +453,11 @@ export const simulateWaterfall = (
         if (debtDist) debtDist.fromDebtRepayment += payment;
 
         remainingProceeds -= payment;
-        calculationLog.push(`Repaid ${payment.toLocaleString(language)} to debt holder ${debt.lenderName}. Remaining: ${remainingProceeds.toLocaleString(language)}`);
+        calculationLog.push(`Paid ${formatCurrency(payment)} to debt holder ${debt.lenderName} (${debt.seniority}). Owed: ${formatCurrency(amountToRepay)}. Remaining: ${formatCurrency(remainingProceeds)}`);
     }
 
-    // 2. Liquidation Preferences
+    // --- 2. Liquidation Preferences ---
+    calculationLog.push(`--- Phase 2: Liquidation Preferences ---`);
     const rankedShareClasses = [...allShareClasses.values()]
         .filter(sc => sc.liquidationPreferenceRank > 0)
         .sort((a, b) => a.liquidationPreferenceRank - b.liquidationPreferenceRank);
@@ -446,29 +471,36 @@ export const simulateWaterfall = (
 
         const preferenceAmount = totalInvestmentInClass * sc.liquidationPreferenceFactor;
         const payment = Math.min(remainingProceeds, preferenceAmount);
+        calculationLog.push(`Paying Rank ${sc.liquidationPreferenceRank} (${sc.name}): Owed=${formatCurrency(preferenceAmount)}, Available=${formatCurrency(payment)}.`);
 
         for (const holder of holdersOfClass) {
             const holderPayment = totalInvestmentInClass > 0 ? ((holder.initialInvestment || 0) / totalInvestmentInClass) * payment : 0;
             const dist = distributions.get(`${holder.stakeholderId}-${holder.shareClassId}`);
-            if (dist) dist.fromLiquidationPreference += holderPayment;
+            if (dist) {
+                 dist.fromLiquidationPreference += holderPayment;
+                 calculationLog.push(`  - ${holder.stakeholderName} receives ${formatCurrency(holderPayment)}`);
+            }
         }
 
         remainingProceeds -= payment;
-        calculationLog.push(`Paid ${payment.toLocaleString(language)} for ${sc.liquidationPreferenceFactor}x preference to ${sc.name} holders. Remaining: ${remainingProceeds.toLocaleString(language)}`);
+        calculationLog.push(`Remaining after Rank ${sc.liquidationPreferenceRank}: ${formatCurrency(remainingProceeds)}`);
     }
 
-    // 3. Participation & Common Stock Distribution
+    // --- 3. Participation & Common Stock Distribution ---
+     calculationLog.push(`--- Phase 3: Participation & Common Stock ---`);
     if (remainingProceeds > 0) {
+        // Here, we decide which preferred shares convert vs stay with their preference-only payout.
+        // This is a simplification; in reality, it's an economic choice per shareholder.
+        // Simplified rule: Non-participating shares are "paid off" by their preference and don't convert.
         const participatingEntries = capTable.entries.filter(entry => {
             const sc = allShareClasses.get(entry.shareClassId);
-            // Simplification: Non-participating chose preference and are out. Real-world they might convert.
-            return sc && (sc.liquidationPreferenceRank === 0 || sc.liquidationPreferenceType !== 'NON_PARTICIPATING');
+            return sc && (sc.liquidationPreferenceType !== 'NON_PARTICIPATING' || sc.liquidationPreferenceRank === 0);
         });
 
         const totalParticipatingShares = participatingEntries.reduce((sum, e) => sum + e.shares, 0);
 
         if (totalParticipatingShares > 0) {
-            calculationLog.push(`Distributing remaining ${remainingProceeds.toLocaleString(language)} among ${totalParticipatingShares.toLocaleString(language)} common & participating shares.`);
+            calculationLog.push(`Distributing remaining ${formatCurrency(remainingProceeds)} among ${formatCurrency(totalParticipatingShares)} common & participating shares.`);
             
             const proceedsToDistribute = remainingProceeds;
             let paidOutInLoop = 0;
@@ -486,6 +518,9 @@ export const simulateWaterfall = (
                     const capAmount = dist.initialInvestment * sc.participationCapFactor;
                     const maxAdditionalPayment = Math.max(0, capAmount - totalPaidSoFar);
                     finalPayment = Math.min(proRataShare, maxAdditionalPayment);
+                     if (finalPayment < proRataShare) {
+                        calculationLog.push(`  - ${entry.stakeholderName} (${sc.name}) hit participation cap of ${sc.participationCapFactor}x. Payment limited to ${formatCurrency(finalPayment)}.`);
+                    }
                 }
                 
                 if (sc.liquidationPreferenceRank === 0) {
@@ -494,9 +529,15 @@ export const simulateWaterfall = (
                     dist.fromParticipation += finalPayment;
                 }
                 paidOutInLoop += finalPayment;
+                 calculationLog.push(`  - ${entry.stakeholderName} (${sc.name}) receives pro-rata payment of ${formatCurrency(finalPayment)}.`);
             }
             remainingProceeds -= paidOutInLoop;
+             calculationLog.push(`Final remaining value after participation: ${formatCurrency(remainingProceeds)}.`);
+        } else {
+            calculationLog.push(`No participating shares left. ${formatCurrency(remainingProceeds)} remains undistributed.`);
         }
+    } else {
+        calculationLog.push(`No proceeds left for common or participating shares.`);
     }
     
     const finalDistributions = Array.from(distributions.values());
@@ -511,4 +552,284 @@ export const simulateWaterfall = (
         remainingValue: remainingProceeds,
         calculationLog,
     };
+};
+
+export const calculateTotalCapitalization = (
+    transactions: Transaction[],
+    capTable: CapTable,
+    asOfDate: string,
+    t: Translations,
+    locale: string,
+    projectCurrency: string
+): TotalCapitalizationResult => {
+    const entries: TotalCapitalizationEntry[] = [];
+    let totalValue = 0;
+
+    // 1. Equity from Cap Table
+    capTable.entries.forEach(entry => {
+        const value = entry.initialInvestment || 0;
+        entries.push({
+            key: `equity-${entry.stakeholderId}-${entry.shareClassId}`,
+            stakeholderName: entry.stakeholderName,
+            instrumentName: entry.shareClassName,
+            instrumentType: 'Equity',
+            amountOrShares: `${entry.shares.toLocaleString(locale)}`,
+            value: value,
+        });
+        totalValue += value;
+    });
+
+    // Determine converted loans
+    const convertedLoanIds = new Set<string>();
+    transactions
+        .filter(tx => tx.type === TransactionType.FINANCING_ROUND && new Date(tx.date) <= new Date(asOfDate) && tx.status === 'ACTIVE')
+        .forEach(tx => {
+            (tx as FinancingRoundTransaction).convertsLoanIds?.forEach(id => convertedLoanIds.add(id));
+        });
+
+    // 2. Hybrid Capital (Unconverted Convertible Loans)
+    transactions
+        .filter(tx => 
+            tx.type === TransactionType.CONVERTIBLE_LOAN && 
+            tx.status === 'ACTIVE' && 
+            new Date(tx.validFrom) <= new Date(asOfDate) &&
+            (!tx.validTo || new Date(tx.validTo) > new Date(asOfDate)) &&
+            !convertedLoanIds.has(tx.id)
+        )
+        .forEach(tx => {
+            const loan = tx as ConvertibleLoanTransaction;
+            const interest = calculateAccruedInterest(loan, asOfDate);
+            const value = loan.amount + interest;
+            entries.push({
+                key: `hybrid-${loan.id}`,
+                stakeholderName: loan.investorName,
+                instrumentName: `${t.convertibleLoan} (${loan.date})`,
+                instrumentType: 'Hybrid',
+                amountOrShares: loan.amount.toLocaleString(locale),
+                value: value,
+                valueBreakdown: { principal: loan.amount, interest },
+            });
+            totalValue += value;
+        });
+
+    // 3. Debt Capital
+    transactions
+        .filter(tx => 
+            tx.type === TransactionType.DEBT_INSTRUMENT && 
+            tx.status === 'ACTIVE' && 
+            new Date(tx.validFrom) <= new Date(asOfDate) &&
+            (!tx.validTo || new Date(tx.validTo) > new Date(asOfDate))
+        )
+        .forEach(tx => {
+            const debt = tx as DebtInstrumentTransaction;
+            const interest = calculateAccruedInterest(debt, asOfDate);
+            const value = debt.amount + interest;
+            entries.push({
+                key: `debt-${debt.id}`,
+                stakeholderName: debt.lenderName,
+                instrumentName: `${t.debtInstrument} (${debt.date})`,
+                instrumentType: 'Debt',
+                amountOrShares: debt.amount.toLocaleString(locale),
+                value: value,
+                valueBreakdown: { principal: debt.amount, interest },
+            });
+            totalValue += value;
+        });
+
+    return { entries, totalValue, currency: projectCurrency };
+};
+
+
+export const calculateCashflow = (
+    transactions: Transaction[],
+    asOfDate: string,
+    t: Translations,
+    projectCurrency: string
+): CashflowResult => {
+    const relevantTxs = transactions
+        .filter(tx => tx.status === TransactionStatus.ACTIVE && new Date(tx.date) <= new Date(asOfDate))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    let balance = 0;
+    const entries: CashflowEntry[] = [];
+
+    for (const tx of relevantTxs) {
+        let cashIn = 0;
+        const cashOut = 0; // Currently no cash-out transactions
+        let description = '';
+
+        switch (tx.type) {
+            case TransactionType.FOUNDING: {
+                cashIn = tx.shareholdings.reduce((sum, sh) => sum + (sh.investment || 0), 0);
+                description = `${t.founding}: ${tx.companyName}`;
+                break;
+            }
+            case TransactionType.FINANCING_ROUND: {
+                cashIn = tx.newShareholdings.reduce((sum, sh) => sum + (sh.investment || 0), 0);
+                description = `${t.financingRound}: ${tx.roundName}`;
+                break;
+            }
+            case TransactionType.CONVERTIBLE_LOAN: {
+                cashIn = tx.amount;
+                description = `${t.convertibleLoan}: ${tx.investorName}`;
+                break;
+            }
+            case TransactionType.DEBT_INSTRUMENT: {
+                cashIn = tx.amount;
+                description = `${t.debtInstrument}: ${tx.lenderName}`;
+                break;
+            }
+            case TransactionType.EQUALIZATION_PURCHASE: {
+                const eqTx = tx as EqualizationPurchaseTransaction;
+                const baseInvestment = eqTx.purchasedShares * eqTx.pricePerShare;
+                const referenceTx = relevantTxs.find(t => t.id === eqTx.referenceTransactionId);
+                let equalizationInterest = 0;
+                if (referenceTx) {
+                    const startDate = new Date(referenceTx.date);
+                    const endDate = new Date(eqTx.date);
+                    if (endDate > startDate) {
+                        const years = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+                        equalizationInterest = baseInvestment * eqTx.equalizationInterestRate * years;
+                    }
+                }
+                cashIn = baseInvestment + equalizationInterest;
+                description = `${t.equalizationPurchase}: ${eqTx.newStakeholderName}`;
+                break;
+            }
+            default:
+                // Other transactions have no direct cash impact on the company
+                continue;
+        }
+
+        if (cashIn > 0 || cashOut > 0) {
+            balance += cashIn - cashOut;
+            entries.push({
+                key: tx.id,
+                date: tx.date,
+                description,
+                cashIn,
+                cashOut,
+                balance
+            });
+        }
+    }
+
+    return { entries, finalBalance: balance, currency: projectCurrency };
+};
+
+
+export const assessProject = (
+    transactions: Transaction[],
+    capTable: CapTable,
+    t: Translations
+): ProjectAssessmentResult => {
+    const findings: AssessmentFinding[] = [];
+    const asOfDate = capTable.asOfDate;
+    const allShareClasses = getShareClassesAsOf(transactions, asOfDate);
+    const foundingTx = transactions.find(tx => tx.type === TransactionType.FOUNDING) as FoundingTransaction | undefined;
+
+    // Check 1: Founder Vesting
+    if (foundingTx) {
+        const founders = new Set(foundingTx.shareholdings.map(sh => sh.stakeholderId));
+        capTable.entries.forEach(entry => {
+            if (founders.has(entry.stakeholderId) && !entry.vestingScheduleId) {
+                findings.push({
+                    severity: 'danger',
+                    title: t.projectAssessment.findingFounderNoVestingTitle,
+                    description: t.projectAssessment.findingFounderNoVestingDesc.replace('{stakeholderName}', entry.stakeholderName)
+                });
+            }
+        });
+        const hasStandardVesting = capTable.entries.some(entry => {
+            if (!entry.vestingScheduleId) return false;
+            const vestingSchedules = getVestingSchedulesAsOf(transactions, asOfDate);
+            const schedule = vestingSchedules.get(entry.vestingScheduleId);
+            return schedule && schedule.vestingPeriodMonths === 48 && schedule.cliffMonths === 12;
+        });
+        if (hasStandardVesting) {
+            findings.push({
+                severity: 'info',
+                title: t.projectAssessment.findingStandardVestingTitle,
+                description: t.projectAssessment.findingStandardVestingDesc
+            });
+        }
+    }
+
+    // Check 2: Share Class Terms
+    allShareClasses.forEach(sc => {
+        if (sc.liquidationPreferenceFactor > 2) {
+            findings.push({
+                severity: 'warning',
+                title: t.projectAssessment.findingAggressiveLiqPrefTitle,
+                description: t.projectAssessment.findingAggressiveLiqPrefDesc.replace('{shareClassName}', sc.name).replace('{factor}', String(sc.liquidationPreferenceFactor))
+            });
+        }
+        if (sc.antiDilutionProtection === 'FULL_RATCHET') {
+            findings.push({
+                severity: 'warning',
+                title: t.projectAssessment.findingFullRatchetTitle,
+                description: t.projectAssessment.findingFullRatchetDesc.replace('{shareClassName}', sc.name)
+            });
+        }
+    });
+
+    // Check 3: Down Rounds
+    const financingRounds = transactions
+        .filter(tx => tx.type === TransactionType.FINANCING_ROUND && tx.status === 'ACTIVE' && new Date(tx.date) <= new Date(asOfDate))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) as FinancingRoundTransaction[];
+
+    let lastPostMoney = -1;
+    financingRounds.forEach(round => {
+        const totalInvestment = round.newShareholdings.reduce((sum, sh) => sum + (sh.investment || 0), 0);
+        const postMoney = round.preMoneyValuation + totalInvestment;
+        if (lastPostMoney > 0 && round.preMoneyValuation < lastPostMoney) {
+             findings.push({
+                severity: 'warning',
+                title: t.projectAssessment.findingDownRoundTitle,
+                description: t.projectAssessment.findingDownRoundDesc.replace('{roundName}', round.roundName).replace('{preMoney}', postMoney.toLocaleString())
+            });
+        }
+        lastPostMoney = postMoney;
+    });
+
+    // Remove duplicate findings by title
+    const uniqueFindings = Array.from(new Map(findings.map(item => [item.title, item])).values());
+    
+    // Add an info finding if no issues were found
+    if (uniqueFindings.length === 0) {
+         findings.push({
+            severity: 'info',
+            title: t.projectAssessment.noIssuesFoundTitle,
+            description: t.projectAssessment.noIssuesFoundDesc
+        });
+    }
+
+    return { asOfDate, findings: uniqueFindings };
+};
+
+export const summarizeWaterfallByStakeholder = (waterfallResult: WaterfallResult): StakeholderPayoutSummaryResult => {
+    const summaryMap = new Map<string, { name: string; totalInvestment: number; totalPayout: number }>();
+
+    for (const dist of waterfallResult.distributions) {
+        if (!summaryMap.has(dist.stakeholderId)) {
+            summaryMap.set(dist.stakeholderId, { name: dist.stakeholderName, totalInvestment: 0, totalPayout: 0 });
+        }
+        const entry = summaryMap.get(dist.stakeholderId)!;
+        entry.totalInvestment += dist.initialInvestment;
+        entry.totalPayout += dist.totalProceeds;
+    }
+
+    const totalPayoutSum = Array.from(summaryMap.values()).reduce((sum, s) => sum + s.totalPayout, 0);
+
+    const entries: StakeholderPayoutSummaryEntry[] = Array.from(summaryMap.entries()).map(([id, data]) => ({
+        stakeholderId: id,
+        stakeholderName: data.name,
+        totalPayout: data.totalPayout,
+        multipleOnInvestment: data.totalInvestment > 0 ? data.totalPayout / data.totalInvestment : 0,
+        percentageOfTotal: totalPayoutSum > 0 ? (data.totalPayout / totalPayoutSum) * 100 : 0,
+    }));
+
+    entries.sort((a, b) => b.totalPayout - a.totalPayout);
+    
+    return { entries };
 };

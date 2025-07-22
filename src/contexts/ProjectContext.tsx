@@ -1,4 +1,5 @@
 
+
 import React, { createContext, useMemo, useContext } from 'react';
 import type { Project, ShareClass, Stakeholder, Transaction, FoundingTransaction } from '../types';
 import { getShareClassesAsOf } from '../logic/calculations';
@@ -12,15 +13,19 @@ interface ProjectContextType {
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
-export const ProjectProvider = ({ project, children }: { project: Project | null, children: React.ReactNode }) => {
+interface ProjectProviderProps {
+    project: Project | null;
+    children: React.ReactNode;
+}
+
+export const ProjectProvider: React.FC<ProjectProviderProps> = ({ project, children }) => {
     const value = useMemo<ProjectContextType | undefined>(() => {
         if (!project) {
             return undefined;
         }
 
         const allShareClasses = getShareClassesAsOf(project.transactions, new Date().toISOString().split('T')[0]);
-        const foundingTx = project.transactions.find(tx => tx.type === 'FOUNDING') as FoundingTransaction | undefined;
-        const projectCurrency = foundingTx?.currency || 'EUR';
+        const projectCurrency = project.currency || 'EUR';
 
         return {
             transactions: project.transactions,

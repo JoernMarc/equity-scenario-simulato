@@ -6,18 +6,18 @@
  * documentation for any purpose and without fee is hereby prohibited,
  * without a written agreement with Jörn Densing, Wachtberg (Deutschland).
  */
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-import type { Transaction, Shareholding, Stakeholder, WaterfallResult, VotingResult, SampleScenario, FontSize, Theme, CapTable, LegalTab, Project, ParsedImportData } from './types';
+import type { Transaction, Shareholding, Stakeholder, WaterfallResult, VotingResult, SampleScenario, FontSize, Theme, CapTable, LegalTab, Project, ParsedImportData, FoundingTransaction, TotalCapitalizationResult, CashflowResult, ProjectAssessmentResult, StakeholderPayoutSummaryResult } from './types';
 import { TransactionType, FONT_SIZES, THEMES } from './types';
 import Header from './components/Header';
 import TransactionList from './components/TransactionList';
 import TransactionFormModal from './components/TransactionFormModal';
 import PlusIcon from './styles/icons/PlusIcon';
 import ConfirmDialog from './components/ConfirmDialog';
-import { calculateCapTable, simulateWaterfall, simulateVote } from './logic/calculations';
+import { calculateCapTable, simulateWaterfall, simulateVote, calculateTotalCapitalization, calculateCashflow, assessProject, summarizeWaterfallByStakeholder } from './logic/calculations';
 import { exportToExcel, parseExcelImport } from './logic/importExport';
 import CapTableView from './components/CapTableView';
 import WaterfallView from './components/WaterfallView';
@@ -30,32 +30,73 @@ import { snakeToCamel } from './logic/utils';
 import { useLocalization } from './contexts/LocalizationContext';
 import { ProjectProvider } from './contexts/ProjectContext';
 import type { Translations } from './i18n';
+import PrintIcon from './styles/icons/PrintIcon';
+import TotalCapitalizationView from './components/TotalCapitalizationView';
+import ChevronLeftIcon from './styles/icons/ChevronLeftIcon';
+import ChevronRightIcon from './styles/icons/ChevronRightIcon';
+import HelpTooltip from './components/HelpTooltip';
+import CashflowView from './components/CashflowView';
+import ProjectAssessmentView from './components/ProjectAssessmentView';
+import ComparisonView from './components/ComparisonView';
+import StakeholderPayoutSummaryView from './components/StakeholderPayoutSummaryView';
 
 
 // --- STATE STRUCTURE ---
 interface AppState {
   projects: Record<string, Project>;
   activeProjectId: string | null;
+  comparisonProjectIds: [string | null, string | null];
 }
 
 const APP_STATE_STORAGE_KEY = 'capTableAppState_v2';
 const ACCESSIBILITY_STORAGE_KEY_PREFIX = 'capTableTheme_v2';
 
 function App() {
-  const { t, language } = useLocalization();
-  const [appState, setAppState] = useState<AppState>({ projects: {}, activeProjectId: null });
+  const { t, language, locale } = useLocalization();
+  const [appState, setAppState] = useState<AppState>({ projects: {}, activeProjectId: null, comparisonProjectIds: [null, null] });
   const [theme, setTheme] = useState<Theme>('classic');
   const [fontSize, setFontSize] = useState<FontSize>('base');
   
   // New state for point-in-time simulation
   const [simulationDate, setSimulationDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [isNavCollapsed, setIsNavCollapsed] = useState(false);
+
 
   // Load state from localStorage on initial render
   useEffect(() => {
     try {
-      const savedState = localStorage.getItem(APP_STATE_STORAGE_KEY);
-      if (savedState) {
-        setAppState(JSON.parse(savedState));
+      const savedStateJSON = localStorage.getItem(APP_STATE_STORAGE_KEY);
+      if (savedStateJSON) {
+        let savedState: AppState = JSON.parse(savedStateJSON);
+        
+        // Migration for comparison mode
+        if (!savedState.comparisonProjectIds) {
+            savedState.comparisonProjectIds = [null, null];
+        }
+
+        // --- MIGRATION LOGIC for project currency ---
+        let needsUpdate = false;
+        Object.values(savedState.projects).forEach(proj => {
+            if (!proj.currency) {
+                const foundingTx = proj.transactions.find(tx => tx.type === TransactionType.FOUNDING) as FoundingTransaction | undefined;
+                if (foundingTx && foundingTx.currency) {
+                    proj.currency = foundingTx.currency;
+                    delete foundingTx.currency;
+                    needsUpdate = true;
+                } else {
+                    // Fallback for projects that might not have a founding tx or currency property
+                    proj.currency = 'EUR';
+                    needsUpdate = true;
+                }
+            }
+        });
+        
+        setAppState(savedState);
+        
+        // If we migrated, save the updated state back to localStorage
+        if (needsUpdate) {
+            localStorage.setItem(APP_STATE_STORAGE_KEY, JSON.stringify(savedState));
+        }
       }
       const savedTheme = localStorage.getItem(`${ACCESSIBILITY_STORAGE_KEY_PREFIX}_theme`);
       if (savedTheme && THEMES.includes(savedTheme as Theme)) {
@@ -67,7 +108,7 @@ function App() {
       }
     } catch (error) {
         console.error("Failed to load or parse state from localStorage", error);
-        setAppState({ projects: {}, activeProjectId: null });
+        setAppState({ projects: {}, activeProjectId: null, comparisonProjectIds: [null, null] });
     }
   }, []);
 
@@ -107,6 +148,8 @@ function App() {
   const hasFoundingTransaction = useMemo(() => transactions.some(t => t.type === TransactionType.FOUNDING), [transactions]);
   const isFoundingDeletable = useMemo(() => transactions.length === 1 && hasFoundingTransaction, [transactions, hasFoundingTransaction]);
 
+  const inComparisonMode = useMemo(() => !!(appState.comparisonProjectIds[0] && appState.comparisonProjectIds[1]), [appState.comparisonProjectIds]);
+
   // Modal & Dialog states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentFormType, setCurrentFormType] = useState<TransactionType | null>(null);
@@ -127,10 +170,15 @@ function App() {
 
   // Simulation states
   const [exitProceeds, setExitProceeds] = useState<number | ''>('');
-  const [transactionCosts, setTransactionCosts] = useState<number | ''>('');
+  const [transactionCosts, setTransactionCosts] = useState<number | ''>(0);
   const [waterfallResult, setWaterfallResult] = useState<WaterfallResult | null>(null);
+  const [stakeholderPayoutSummaryResult, setStakeholderPayoutSummaryResult] = useState<StakeholderPayoutSummaryResult | null>(null);
   const [votingResult, setVotingResult] = useState<VotingResult | null>(null);
+  const [projectAssessment, setProjectAssessment] = useState<ProjectAssessmentResult | null>(null);
   const [pendingModalType, setPendingModalType] = useState<TransactionType | null>(null);
+  const [capTableLastRun, setCapTableLastRun] = useState<string | null>(null);
+  const [waterfallLastRun, setWaterfallLastRun] = useState<string | null>(null);
+  const [votingLastRun, setVotingLastRun] = useState<string | null>(null);
 
 
   // --- HANDLERS ---
@@ -146,7 +194,7 @@ function App() {
     setCurrentFormType(type);
     setEditingTransaction(null);
     setIsModalOpen(true);
-  }, [hasFoundingTransaction, t.noTransactions]);
+  }, [hasFoundingTransaction, t]);
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
@@ -167,25 +215,73 @@ function App() {
     setIsConfirmOpen(true);
   }, []);
 
-  // Reset simulation results when transactions change or project switches
+  // Reset simulation results when project switches
   useEffect(() => {
     setExitProceeds('');
-    setTransactionCosts('');
-    setWaterfallResult(null);
-    setVotingResult(null);
+    setTransactionCosts(0);
     setSearchQuery('');
     setSimulationDate(new Date().toISOString().split('T')[0]); // Reset date on project change
     if (activeProject) {
         document.title = `${activeProject.name} - ${t.appTitle}`;
+    } else if (inComparisonMode) {
+        document.title = `${t.comparisonViewTitle} - ${t.appTitle}`;
     } else {
         document.title = t.appTitle;
     }
-  }, [appState.activeProjectId, activeProject, t.appTitle]);
+  }, [appState.activeProjectId, inComparisonMode, t.appTitle, t.comparisonViewTitle]);
+
+  // Reset calculation results when underlying data changes
+  useEffect(() => {
+    setWaterfallResult(null);
+    setStakeholderPayoutSummaryResult(null);
+    setVotingResult(null);
+    setProjectAssessment(null);
+    setCapTableLastRun(null);
+    setWaterfallLastRun(null);
+    setVotingLastRun(null);
+  }, [transactions, simulationDate]);
   
   const capTableResult = useMemo((): CapTable | null => {
-    if (!hasFoundingTransaction) return null;
+    if (!hasFoundingTransaction || inComparisonMode) return null;
     return calculateCapTable(transactions, simulationDate);
-  }, [transactions, simulationDate, hasFoundingTransaction]);
+  }, [transactions, simulationDate, hasFoundingTransaction, inComparisonMode]);
+
+  useEffect(() => {
+      if (capTableResult) {
+          setCapTableLastRun(new Date().toLocaleString(locale));
+      } else {
+          setCapTableLastRun(null);
+      }
+  }, [capTableResult, locale]);
+
+  const totalCapitalizationResult = useMemo((): TotalCapitalizationResult | null => {
+    if (!capTableResult || !activeProject) return null;
+    return calculateTotalCapitalization(transactions, capTableResult, simulationDate, t, locale, activeProject.currency);
+  }, [capTableResult, transactions, simulationDate, t, locale, activeProject]);
+  
+  const cashflowResult = useMemo((): CashflowResult | null => {
+      if (!hasFoundingTransaction || inComparisonMode) return null;
+      return calculateCashflow(transactions, simulationDate, t, activeProject?.currency || 'EUR');
+  }, [transactions, simulationDate, hasFoundingTransaction, inComparisonMode, activeProject, t]);
+
+  useMemo(() => {
+      if(waterfallResult) {
+          setStakeholderPayoutSummaryResult(summarizeWaterfallByStakeholder(waterfallResult));
+      } else {
+          setStakeholderPayoutSummaryResult(null);
+      }
+  }, [waterfallResult]);
+  
+  // Re-calculate assessment on language change if it's already displayed
+  useEffect(() => {
+    setProjectAssessment(currentAssessment => {
+        if (currentAssessment && capTableResult) {
+            return assessProject(transactions, capTableResult, t);
+        }
+        return currentAssessment;
+    });
+  }, [t, capTableResult, transactions]);
+
 
   const getOrCreateStakeholder = (name: string, currentStakeholders: Stakeholder[]): { id: string, updatedStakeholders: Stakeholder[] } => {
     const existing = currentStakeholders.find(s => s.name.toLowerCase() === name.toLowerCase());
@@ -213,6 +309,11 @@ function App() {
             }
         });
       };
+      
+      if (transaction.type === TransactionType.FOUNDING && transaction.currency) {
+          project.currency = transaction.currency;
+          delete transaction.currency; // Remove from transaction object after setting on project
+      }
 
       if (transaction.type === TransactionType.FOUNDING) {
         processShareholdings(transaction.shareholdings);
@@ -272,9 +373,14 @@ function App() {
        setAppState(currentAppState => {
           const newProjects = { ...currentAppState.projects };
           delete newProjects[deletingId];
+          const newComparisonIds = [...currentAppState.comparisonProjectIds];
+          if (newComparisonIds[0] === deletingId) newComparisonIds[0] = null;
+          if (newComparisonIds[1] === deletingId) newComparisonIds[1] = null;
+
           return {
             projects: newProjects,
-            activeProjectId: currentAppState.activeProjectId === deletingId ? null : currentAppState.activeProjectId
+            activeProjectId: currentAppState.activeProjectId === deletingId ? null : currentAppState.activeProjectId,
+            comparisonProjectIds: newComparisonIds as [string | null, string | null]
           };
        });
     }
@@ -286,9 +392,18 @@ function App() {
 
   const handleSimulateWaterfall = (e: React.FormEvent) => {
     e.preventDefault();
-    if (capTableResult && exitProceeds !== '' && transactionCosts !== '') {
-      const result = simulateWaterfall(capTableResult, transactions, exitProceeds, transactionCosts, language);
-      setWaterfallResult(result);
+    if (capTableResult && exitProceeds !== '') {
+        const proceeds = exitProceeds as number;
+        const costs = transactionCosts === '' ? 0 : transactionCosts as number;
+
+        if (isNaN(proceeds) || isNaN(costs)) {
+            console.error("Invalid input for waterfall simulation.");
+            return;
+        }
+
+        const result = simulateWaterfall(capTableResult, transactions, proceeds, costs, language);
+        setWaterfallResult(result);
+        setWaterfallLastRun(new Date().toLocaleString(locale));
     }
   };
 
@@ -296,9 +411,17 @@ function App() {
     if (capTableResult) {
       const result = simulateVote(capTableResult, transactions);
       setVotingResult(result);
+      setVotingLastRun(new Date().toLocaleString(locale));
     }
   };
   
+  const handleAnalyzeProject = useCallback(() => {
+    if (capTableResult) {
+        const result = assessProject(transactions, capTableResult, t);
+        setProjectAssessment(result);
+    }
+  }, [capTableResult, transactions, t]);
+
   const handleOpenImportExportModal = () => setIsImportExportModalOpen(true);
   const handleCloseImportExportModal = () => setIsImportExportModalOpen(false);
 
@@ -336,6 +459,7 @@ function App() {
         const newProject: Project = {
             id: crypto.randomUUID(),
             name: parsedImportData.projectName,
+            currency: 'EUR', // Default for imported projects, can be changed if specified in Excel
             transactions: parsedImportData.transactions,
             stakeholders: parsedImportData.stakeholders
         };
@@ -345,7 +469,8 @@ function App() {
                 ...s.projects,
                 [newProject.id]: newProject
             },
-            activeProjectId: newProject.id
+            activeProjectId: newProject.id,
+            comparisonProjectIds: [null, null]
         }));
         setParsedImportData(null);
         setIsImportExportModalOpen(false);
@@ -358,11 +483,12 @@ function App() {
   };
   
   const handleCreateProject = (name: string) => {
-    const newProject: Project = { id: crypto.randomUUID(), name, transactions: [], stakeholders: [] };
+    const newProject: Project = { id: crypto.randomUUID(), name, currency: '', transactions: [], stakeholders: [] };
     setAppState(s => {
       const newState = {
           projects: { ...s.projects, [newProject.id]: newProject },
-          activeProjectId: newProject.id
+          activeProjectId: newProject.id,
+          comparisonProjectIds: [null, null] as [string|null, string|null]
       };
       return newState;
     });
@@ -371,7 +497,7 @@ function App() {
   };
 
   const handleSelectProject = (id: string) => {
-    setAppState(s => ({ ...s, activeProjectId: id }));
+    setAppState(s => ({ ...s, activeProjectId: id, comparisonProjectIds: [null, null] }));
   };
   
   const handleRenameProject = (id: string, newName: string) => {
@@ -389,19 +515,21 @@ function App() {
   }
 
   const handleBackToDashboard = () => {
-    setAppState(s => ({...s, activeProjectId: null}));
+    setAppState(s => ({...s, activeProjectId: null, comparisonProjectIds: [null, null]}));
   };
   
   const handleLoadScenario = (scenarioData: SampleScenario['data']) => {
       const newProject: Project = {
           id: crypto.randomUUID(),
           name: scenarioData.projectName,
+          currency: 'EUR', // Sample scenarios are in EUR
           transactions: scenarioData.transactions,
           stakeholders: scenarioData.stakeholders
       };
        setAppState(s => ({
             projects: { ...s.projects, [newProject.id]: newProject },
-            activeProjectId: newProject.id
+            activeProjectId: newProject.id,
+            comparisonProjectIds: [null, null]
         }));
   };
   
@@ -427,22 +555,37 @@ function App() {
       }
   };
 
-  const printRef = useRef(null);
+  const handlePrint = (containerId: string) => {
+    const style = document.createElement('style');
+    style.id = 'temp-print-style';
+    
+    let selectorsToHide = [
+        'header', 'footer', '.no-print', '#simulation-controls-row'
+    ];
 
-  const handlePrint = async (containerId: string) => {
-    const element = document.getElementById(containerId);
-    if (element) {
-        const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: 'rgb(var(--color-bg-surface))' });
-        const data = canvas.toDataURL('image/png');
-        
-        const printWindow = window.open('', '', 'height=800,width=1200');
-        printWindow?.document.write('<html><head><title>Print</title></head><body>');
-        printWindow?.document.write(`<img src="${data}" style="width:100%;" />`);
-        printWindow?.document.write('</body></html>');
-        printWindow?.document.close();
-        printWindow?.focus();
-        setTimeout(() => printWindow?.print(), 500);
+    if (inComparisonMode) {
+        selectorsToHide = ['header', 'footer', '.no-print', '#comparison-controls'];
+    } else {
+        const resultsViews = ['cap-table-view', 'voting-view', 'waterfall-view', 'total-capitalization-view', 'cashflow-view', 'project-assessment-view', 'stakeholder-payout-summary-view'];
+        if (resultsViews.includes(containerId)) {
+            selectorsToHide.push('#transaction-column');
+        } else { // printing transaction column
+            selectorsToHide.push('#results-column');
+        }
     }
+    
+    style.innerHTML = `@media print { ${selectorsToHide.join(', ')} { display: none !important; } }`;
+    document.head.appendChild(style);
+
+    window.print();
+
+    // Use a timeout to ensure the print dialog has time to process before removing the style
+    setTimeout(() => {
+        const styleElement = document.getElementById('temp-print-style');
+        if (styleElement) {
+            document.head.removeChild(styleElement);
+        }
+    }, 500);
   };
 
   const handleExportImage = async (format: 'png' | 'pdf', containerId: string) => {
@@ -476,6 +619,270 @@ function App() {
     return t.confirmDeleteMessage;
   };
 
+  const toggleNav = () => setIsNavCollapsed(prev => !prev);
+  
+  const handleStartComparison = (projectIds: [string, string]) => {
+      setAppState(s => ({
+          ...s,
+          activeProjectId: null,
+          comparisonProjectIds: projectIds
+      }));
+  };
+  
+  const handleStopComparison = () => {
+       setAppState(s => ({
+          ...s,
+          comparisonProjectIds: [null, null]
+      }));
+  };
+
+  const handleChangeComparedProject = (index: 0 | 1, newProjectId: string) => {
+      setAppState(s => {
+          const newComparisonIds = [...s.comparisonProjectIds] as [string | null, string | null];
+          newComparisonIds[index] = newProjectId;
+          return {
+              ...s,
+              comparisonProjectIds: newComparisonIds
+          };
+      });
+  };
+
+  const renderContent = () => {
+      if (inComparisonMode) {
+          return <ComparisonView 
+                    projectIds={appState.comparisonProjectIds as [string, string]}
+                    allProjects={Object.values(appState.projects)}
+                    onStopComparison={handleStopComparison}
+                    onChangeProject={handleChangeComparedProject}
+                    onPrint={() => handlePrint('comparison-view-container')}
+                  />;
+      }
+      if (!activeProject) {
+          return <ProjectDashboard
+                    projects={Object.values(appState.projects)}
+                    onCreateProject={handleCreateProject}
+                    onSelectProject={handleSelectProject}
+                    onRenameProject={handleRenameProject}
+                    onDeleteProject={(id) => handleDeleteRequest('project', id)}
+                    onLoadScenario={handleLoadScenario}
+                    onStartComparison={handleStartComparison}
+                  />;
+      }
+      // Single Project View
+      return (
+        <ProjectProvider project={activeProject}>
+            <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+              <div className="flex justify-between items-center flex-wrap gap-4 no-print">
+                <h2 className="text-2xl font-bold text-primary">{t.activeProject}: <span className="text-interactive">{activeProject.name} ({activeProject.currency})</span></h2>
+                <button onClick={handleBackToDashboard} className="text-sm text-interactive hover:underline">{t.backToDashboard}</button>
+              </div>
+              
+              <div className="flex flex-col xl:flex-row gap-8">
+                  {/* Left Column: Transactions */}
+                  <aside
+                    id="transaction-column"
+                    className={`
+                      flex flex-col gap-6 flex-shrink-0 transition-all duration-300 ease-in-out 
+                      ${isNavCollapsed ? 'w-full xl:w-20' : 'w-full xl:w-2/5'}
+                    `}
+                  >
+                    <div className={`no-print ${isNavCollapsed ? 'hidden' : ''}`}>
+                      <label htmlFor="search-input" className="block text-sm font-medium text-secondary mb-1">{t.search}</label>
+                      <input
+                          id="search-input"
+                          type="text"
+                          placeholder={t.searchPlaceholder}
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full px-4 py-2 bg-surface border border-strong rounded-md"
+                      />
+                    </div>
+
+                    <div id="transaction-log-view" className="bg-surface p-4 sm:p-6 rounded-lg shadow-sm border border-subtle h-full flex flex-col flex-grow">
+                      <div className="flex items-center mb-4 gap-2">
+                        <div className="flex items-center gap-4">
+                          <button onClick={toggleNav} className="p-2 rounded-md transition-colors text-secondary hover:bg-background-subtle no-print" title={isNavCollapsed ? t.expand : t.collapse}>
+                            {isNavCollapsed ? <ChevronRightIcon className="w-5 h-5" /> : <ChevronLeftIcon className="w-5 h-5" />}
+                          </button>
+                          <h3 className={`text-xl font-semibold text-primary ${isNavCollapsed ? 'hidden' : ''}`}>
+                            {t.transactionLog}
+                          </h3>
+                        </div>
+                        <div className="flex-grow" />
+                        <div className={`flex items-center gap-2 no-print ${isNavCollapsed ? 'hidden' : ''}`}>
+                          <div className="relative group">
+                            <button className="flex items-center gap-2 w-full justify-center px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover">
+                              <PlusIcon className="w-5 h-5" />
+                              <span>{t.addTransaction}</span>
+                            </button>
+                            <div className="absolute right-0 mt-2 w-56 origin-top-right bg-surface border border-subtle rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                              <div className="py-1">
+                                {Object.values(TransactionType).map(type => {
+                                  const translationKey = snakeToCamel(type) as keyof Translations;
+                                  const buttonText = t[translationKey];
+                                  return (
+                                    <button key={type} onClick={() => handleOpenModal(type)} className="w-full text-left block px-4 py-2 text-sm text-primary hover:bg-background-subtle">
+                                      {typeof buttonText === 'string' ? buttonText : translationKey}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                          <button onClick={() => handlePrint('transaction-log-view')} className="p-2 rounded-md transition-colors text-secondary hover:bg-background-subtle" title={t.print}>
+                            <PrintIcon className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className={`flex-grow overflow-y-auto ${isNavCollapsed ? 'hidden' : ''}`}>
+                        <TransactionList
+                            onEdit={handleEditTransaction}
+                            onDelete={(id) => handleDeleteRequest('transaction', id)}
+                            isFoundingDeletable={isFoundingDeletable}
+                            searchQuery={searchQuery}
+                            simulationDate={simulationDate}
+                        />
+                      </div>
+                    </div>
+                  </aside>
+                  
+                  {/* Right Column: Simulations & Results */}
+                  <section id="results-column" className="flex-grow space-y-8">
+                      <div className="bg-surface p-4 rounded-lg shadow-sm border border-subtle no-print">
+                        <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
+                            <h3 className="text-xl font-semibold text-primary">{t.resultsDisplay}</h3>
+                            <div className="flex items-center gap-2">
+                                <label htmlFor="simulationDate" className="block text-sm font-medium text-secondary whitespace-nowrap">{t.simulationDateLabel}</label>
+                                <input
+                                    type="date"
+                                    id="simulationDate"
+                                    value={simulationDate}
+                                    onChange={(e) => setSimulationDate(e.target.value)}
+                                    className="px-3 py-1 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-1 ring-interactive"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            {/* Voting Section */}
+                            <div className="space-y-3">
+                                <h4 className="font-semibold text-primary">{t.votingSimulationTitle}</h4>
+                                <div className="flex items-center gap-4">
+                                    <button onClick={handleSimulateVote} className="px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover">{t.simulateVote}</button>
+                                    {votingLastRun && <p className="text-xs text-secondary">{t.lastRun}: {votingLastRun}</p>}
+                                </div>
+                            </div>
+                            
+                            <div className="border-t border-subtle"></div>
+                            
+                            {/* Waterfall Section */}
+                            <form onSubmit={handleSimulateWaterfall} className="space-y-3">
+                                <h4 className="font-semibold text-primary">{t.waterfallSimulationTitle}</h4>
+                                <div className="flex items-end gap-4 flex-wrap">
+                                    <div>
+                                        <label htmlFor="exitProceeds" className="flex items-center text-xs font-medium text-secondary">
+                                            {t.exitProceeds}
+                                            <HelpTooltip text={t.help.exitProceeds} />
+                                        </label>
+                                        <input 
+                                            type="number" 
+                                            id="exitProceeds" 
+                                            value={exitProceeds} 
+                                            onChange={e => setExitProceeds(e.target.value === '' ? '' : parseFloat(e.target.value))} 
+                                            required 
+                                            className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md text-right" 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="transactionCosts" className="flex items-center text-xs font-medium text-secondary">
+                                            {t.transactionCosts}
+                                            <HelpTooltip text={t.help.transactionCosts} />
+                                        </label>
+                                        <input 
+                                            type="number" 
+                                            id="transactionCosts" 
+                                            value={transactionCosts} 
+                                            onChange={e => setTransactionCosts(e.target.value === '' ? '' : parseFloat(e.target.value))} 
+                                            className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md text-right" 
+                                        />
+                                    </div>
+                                    <button type="submit" className="px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover whitespace-nowrap">{t.simulateWaterfall}</button>
+                                </div>
+                                {waterfallLastRun && <p className="text-xs text-secondary mt-1">{t.lastRun}: {waterfallLastRun}</p>}
+                            </form>
+                        </div>
+                      </div>
+                      
+                      {capTableResult && (
+                        <ProjectAssessmentView 
+                            assessment={projectAssessment}
+                            onAnalyze={handleAnalyzeProject}
+                            containerId="project-assessment-view"
+                            onPrint={() => handlePrint('project-assessment-view')}
+                            onExport={(format) => handleExportImage(format, 'project-assessment-view')}
+                        />
+                      )}
+
+                      {totalCapitalizationResult && (
+                        <div className="mb-8">
+                            <TotalCapitalizationView
+                                result={totalCapitalizationResult}
+                                containerId="total-capitalization-view"
+                                onPrint={() => handlePrint('total-capitalization-view')}
+                                onExport={(format) => handleExportImage(format, 'total-capitalization-view')}
+                            />
+                        </div>
+                       )}
+                       {cashflowResult && (
+                        <div className="mb-8">
+                            <CashflowView
+                                result={cashflowResult}
+                                containerId="cashflow-view"
+                                onPrint={() => handlePrint('cashflow-view')}
+                                onExport={(format) => handleExportImage(format, 'cashflow-view')}
+                            />
+                        </div>
+                        )}
+                      <CapTableView
+                          capTable={capTableResult}
+                          lastRun={capTableLastRun}
+                          onPrint={() => handlePrint('cap-table-view')}
+                          onExport={(format) => handleExportImage(format, 'cap-table-view')}
+                          containerId="cap-table-view"
+                      />
+                      
+                      {capTableResult && (
+                        <>
+                          <VotingView 
+                              result={votingResult}
+                              lastRun={votingLastRun}
+                              onPrint={() => handlePrint('voting-view')}
+                              onExport={(format) => handleExportImage(format, 'voting-view')}
+                              containerId="voting-view"
+                          />
+
+                          <WaterfallView 
+                              result={waterfallResult}
+                              onPrint={() => handlePrint('waterfall-view')}
+                              onExport={(format) => handleExportImage(format, 'waterfall-view')}
+                              containerId="waterfall-view"
+                          />
+                          
+                          <StakeholderPayoutSummaryView
+                            result={stakeholderPayoutSummaryResult}
+                            containerId="stakeholder-payout-summary-view"
+                            onPrint={() => handlePrint('stakeholder-payout-summary-view')}
+                            onExport={(format) => handleExportImage(format, 'stakeholder-payout-summary-view')}
+                          />
+                        </>
+                      )}
+                  </section>
+              </div>
+            </main>
+          </ProjectProvider>
+      );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-primary">
       <Header
@@ -487,127 +894,7 @@ function App() {
         onDecreaseFontSize={handleDecreaseFontSize}
       />
       <div className="flex-grow w-full">
-        {!activeProject ? (
-          <ProjectDashboard
-            projects={Object.values(appState.projects)}
-            onCreateProject={handleCreateProject}
-            onSelectProject={handleSelectProject}
-            onRenameProject={handleRenameProject}
-            onDeleteProject={(id) => handleDeleteRequest('project', id)}
-            onLoadScenario={handleLoadScenario}
-          />
-        ) : (
-          <ProjectProvider project={activeProject}>
-            <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8" ref={printRef}>
-              <div className="flex justify-between items-center flex-wrap gap-4">
-                <h2 className="text-2xl font-bold text-primary">{t.activeProject}: <span className="text-interactive">{activeProject.name}</span></h2>
-                <button onClick={handleBackToDashboard} className="text-sm text-interactive hover:underline">{t.backToDashboard}</button>
-              </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Left Column: Transactions */}
-                  <div className="space-y-6">
-                      <div className="flex justify-between items-center flex-wrap gap-4">
-                        <h3 className="text-xl font-semibold text-primary">{t.transactionLog}</h3>
-                        <div className="relative group">
-                            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover">
-                              <PlusIcon className="w-5 h-5" /> {t.addTransaction}
-                            </button>
-                            <div className="absolute right-0 mt-2 w-56 origin-top-right bg-surface border border-subtle rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-                                <div className="py-1">
-                                  {Object.values(TransactionType).map(type => {
-                                      const translationKey = snakeToCamel(type) as keyof Translations;
-                                      const buttonText = t[translationKey];
-                                      return (
-                                          <button key={type} onClick={() => handleOpenModal(type)} className="w-full text-left block px-4 py-2 text-sm text-primary hover:bg-background-subtle">
-                                              {typeof buttonText === 'string' ? buttonText : translationKey}
-                                          </button>
-                                      );
-                                  })}
-                                </div>
-                            </div>
-                        </div>
-                      </div>
-                      <input
-                        type="text"
-                        placeholder={t.searchPlaceholder}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full px-4 py-2 bg-surface border border-strong rounded-md"
-                      />
-                      <TransactionList
-                          onEdit={handleEditTransaction}
-                          onDelete={(id) => handleDeleteRequest('transaction', id)}
-                          isFoundingDeletable={isFoundingDeletable}
-                          searchQuery={searchQuery}
-                          simulationDate={simulationDate}
-                      />
-                  </div>
-                  
-                  {/* Right Column: Simulations & Results */}
-                  <div className="space-y-8">
-                      <div>
-                          <h3 className="text-xl font-semibold text-primary mb-4">{t.resultsDisplay}</h3>
-                          <div className="flex items-center gap-4 mb-6">
-                              <label htmlFor="simulationDate" className="text-sm font-medium text-secondary whitespace-nowrap">{t.simulationDateLabel}:</label>
-                              <input
-                                  type="date"
-                                  id="simulationDate"
-                                  value={simulationDate}
-                                  onChange={(e) => setSimulationDate(e.target.value)}
-                                  className="w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive"
-                              />
-                          </div>
-                          <CapTableView
-                              capTable={capTableResult}
-                              onPrint={() => handlePrint('cap-table-view')}
-                              onExport={(format) => handleExportImage(format, 'cap-table-view')}
-                              containerId="cap-table-view"
-                          />
-                      </div>
-                      
-                      {capTableResult && (
-                        <>
-                          <div className="space-y-4">
-                              <VotingView 
-                                  result={votingResult}
-                                  onPrint={() => handlePrint('voting-view')}
-                                  onExport={(format) => handleExportImage(format, 'voting-view')}
-                                  containerId="voting-view"
-                              />
-                              <div className="text-center">
-                                  <button onClick={handleSimulateVote} className="px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover">{t.simulateVote}</button>
-                              </div>
-                          </div>
-
-                          <div className="space-y-4">
-                              <WaterfallView 
-                                  result={waterfallResult}
-                                  onPrint={() => handlePrint('waterfall-view')}
-                                  onExport={(format) => handleExportImage(format, 'waterfall-view')}
-                                  containerId="waterfall-view"
-                              />
-                              <form onSubmit={handleSimulateWaterfall} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-                                  <div>
-                                      <label htmlFor="exitProceeds" className="block text-sm font-medium text-secondary">{t.exitProceeds}</label>
-                                      <input type="number" id="exitProceeds" value={exitProceeds} onChange={e => setExitProceeds(e.target.value === '' ? '' : parseFloat(e.target.value))} className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md" />
-                                  </div>
-                                  <div>
-                                      <label htmlFor="transactionCosts" className="block text-sm font-medium text-secondary">{t.transactionCosts}</label>
-                                      <input type="number" id="transactionCosts" value={transactionCosts} onChange={e => setTransactionCosts(e.target.value === '' ? '' : parseFloat(e.target.value))} className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md" />
-                                  </div>
-                                  <div className="sm:col-span-2 text-center">
-                                      <button type="submit" className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-on-interactive bg-interactive rounded-md hover:bg-interactive-hover">{t.simulateWaterfall}</button>
-                                  </div>
-                              </form>
-                          </div>
-                        </>
-                      )}
-                  </div>
-              </div>
-            </main>
-          </ProjectProvider>
-        )}
+        {renderContent()}
       </div>
       <Footer onOpenLegalModal={handleOpenLegalModal} />
 
@@ -640,7 +927,7 @@ function App() {
         importError={importError}
         onConfirmImport={handleConfirmImport}
         onClearImportPreview={handleClearImportPreview}
-        isExportDisabled={!activeProject}
+        isExportDisabled={!activeProject && !inComparisonMode}
       />
       <LegalModal 
         isOpen={legalModalState.isOpen}

@@ -142,7 +142,10 @@ function CompanyForm({ onSubmit, onCancel, transactionToEdit }: CompanyFormProps
             <input type="text" id="companyName" value={companyName} onChange={e => setCompanyName(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive"/>
           </div>
           <div>
-            <label htmlFor="date" className="block text-sm font-medium text-secondary">{translations.date}</label>
+            <label htmlFor="date" className="flex items-center text-sm font-medium text-secondary">
+                {translations.date}
+                <HelpTooltip text={translations.help.date} />
+            </label>
             <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive"/>
           </div>
           <div>
@@ -152,7 +155,10 @@ function CompanyForm({ onSubmit, onCancel, transactionToEdit }: CompanyFormProps
             </select>
           </div>
           <div>
-            <label htmlFor="currency" className="flex items-center text-sm font-medium text-secondary">{translations.currency} <HelpTooltip text={translations.help.currency} /></label>
+            <label htmlFor="currency" className="flex items-center text-sm font-medium text-secondary">
+                {isEditing ? translations.currency : translations.projectCurrency}
+                <HelpTooltip text={translations.help.currency} />
+            </label>
             <input 
               type="text" 
               id="currency" 
@@ -182,11 +188,17 @@ function CompanyForm({ onSubmit, onCancel, transactionToEdit }: CompanyFormProps
               </select>
             </div>
             <div>
-              <label htmlFor="validFrom" className="block text-sm font-medium text-secondary">{translations.validFrom}</label>
+              <label htmlFor="validFrom" className="flex items-center text-sm font-medium text-secondary">
+                  {translations.validFrom}
+                  <HelpTooltip text={translations.help.validFrom} />
+              </label>
               <input type="date" id="validFrom" value={validFrom} onChange={e => setValidFrom(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive"/>
             </div>
             <div>
-              <label htmlFor="validTo" className="block text-sm font-medium text-secondary">{translations.validTo} <span className="text-subtle">({translations.optional})</span></label>
+              <label htmlFor="validTo" className="flex items-center text-sm font-medium text-secondary">
+                {translations.validTo} <span className="text-subtle">({translations.optional})</span>
+                <HelpTooltip text={translations.help.validTo} />
+              </label>
               <input type="date" id="validTo" value={validTo} onChange={e => setValidTo(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-surface border border-strong rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ring-interactive"/>
             </div>
         </div>
@@ -209,7 +221,7 @@ function CompanyForm({ onSubmit, onCancel, transactionToEdit }: CompanyFormProps
                     <label className="text-sm font-medium text-secondary">{translations.votesPerShare}</label>
                     <input type="number" min="0" value={sc.votesPerShare}
                         onChange={e => handleShareClassChange(index, 'votesPerShare', parseInt(e.target.value, 10) || 0)}
-                        className="w-full px-2 py-1 bg-surface border border-strong rounded-md"
+                        className="w-full px-2 py-1 bg-surface border border-strong rounded-md text-right"
                     />
                 </div>
              </div>
@@ -238,11 +250,11 @@ function CompanyForm({ onSubmit, onCancel, transactionToEdit }: CompanyFormProps
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="text-xs text-secondary">{translations.vestingPeriodMonths}</label>
-                            <input type="number" min="0" value={vs.vestingPeriodMonths} onChange={e => handleVestingScheduleChange(index, 'vestingPeriodMonths', parseInt(e.target.value,10) || 0)} className="w-full px-2 py-1 bg-surface border border-strong rounded-md"/>
+                            <input type="number" min="0" value={vs.vestingPeriodMonths} onChange={e => handleVestingScheduleChange(index, 'vestingPeriodMonths', parseInt(e.target.value,10) || 0)} className="w-full px-2 py-1 bg-surface border border-strong rounded-md text-right"/>
                         </div>
                         <div>
                            <label className="text-xs flex items-center text-secondary">{translations.cliffMonths} <HelpTooltip text={translations.help.vestingCliff} /></label>
-                            <input type="number" min="0" value={vs.cliffMonths} onChange={e => handleVestingScheduleChange(index, 'cliffMonths', parseInt(e.target.value,10) || 0)} className="w-full px-2 py-1 bg-surface border border-strong rounded-md"/>
+                            <input type="number" min="0" value={vs.cliffMonths} onChange={e => handleVestingScheduleChange(index, 'cliffMonths', parseInt(e.target.value,10) || 0)} className="w-full px-2 py-1 bg-surface border border-strong rounded-md text-right"/>
                         </div>
                     </div>
                 </div>

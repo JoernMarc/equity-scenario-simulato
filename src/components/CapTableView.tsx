@@ -8,9 +8,10 @@ interface CapTableViewProps {
   onPrint: () => void;
   onExport: (format: 'png'|'pdf') => void;
   containerId: string;
+  lastRun: string | null;
 }
 
-function CapTableView({ capTable, onPrint, onExport, containerId }: CapTableViewProps) {
+function CapTableView({ capTable, onPrint, onExport, containerId, lastRun }: CapTableViewProps) {
   const { t: translations, locale } = useLocalization();
 
   const content = capTable && capTable.entries.length > 0 ? (
@@ -66,9 +67,9 @@ function CapTableView({ capTable, onPrint, onExport, containerId }: CapTableView
       <div className="flex justify-between items-center mb-4">
         <div>
             <h3 className="text-lg font-semibold text-primary">{translations.capTableTitle}</h3>
-            {capTable && 
+            {lastRun && 
               <p className="text-sm text-secondary">
-                  {translations.asOfDate}: {new Date(capTable.asOfDate).toLocaleDateString(locale)}
+                  {translations.lastRun}: {lastRun}
               </p>
             }
         </div>

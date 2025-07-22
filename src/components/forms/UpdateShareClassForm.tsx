@@ -46,6 +46,11 @@ function UpdateShareClassForm({ onSubmit, onCancel, transactionToEdit }: UpdateS
   const handleFormChange = <K extends keyof ShareClass>(field: K, value: ShareClass[K]) => {
     setFormState(prev => ({...prev, [field]: value}));
   };
+  
+   const handleProvisionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const provisions = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+    handleFormChange('protectiveProvisions', provisions);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +68,7 @@ function UpdateShareClassForm({ onSubmit, onCancel, transactionToEdit }: UpdateS
         }
     });
 
-    if (Object.keys(updatedProperties).length === 0) {
+    if (Object.keys(updatedProperties).length === 0 && !isEditing) {
         alert(t.noPropertiesChanged);
         return;
     }
@@ -110,18 +115,25 @@ function UpdateShareClassForm({ onSubmit, onCancel, transactionToEdit }: UpdateS
                 <label htmlFor="shareClassName" className="block text-sm font-medium text-secondary">{t.shareClassName}</label>
                 <input id="shareClassName" type="text" value={formState.name || ''} onChange={e => handleFormChange('name', e.target.value)} required className={baseInputClasses}/>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                  <div>
-                    <label htmlFor="liqPrefRank" className="block text-sm font-medium text-secondary">{t.liquidationPreferenceRank}</label>
+                    <label htmlFor="liqPrefRank" className="flex items-center text-sm font-medium text-secondary">
+                        {t.liquidationPreferenceRank}
+                        <HelpTooltip text={t.help.liquidationPreferenceRank} />
+                    </label>
                     <input id="liqPrefRank" type="number" min="0" value={formState.liquidationPreferenceRank ?? ''} onChange={e => handleFormChange('liquidationPreferenceRank', parseInt(e.target.value,10) || 0)} required className={`${baseInputClasses} text-right`}/>
                 </div>
                  <div>
-                    <label htmlFor="liqPrefFactor" className="block text-sm font-medium text-secondary">{t.liquidationPreferenceFactor}</label>
+                    <label htmlFor="liqPrefFactor" className="flex items-center text-sm font-medium text-secondary">
+                        {t.liquidationPreferenceFactor}
+                        <HelpTooltip text={t.help.liquidationPreferenceFactor} />
+                    </label>
                     <input id="liqPrefFactor" type="number" min="0" step="0.1" value={formState.liquidationPreferenceFactor ?? ''} onChange={e => handleFormChange('liquidationPreferenceFactor', parseFloat(e.target.value) || 0)} required className={`${baseInputClasses} text-right`}/>
                 </div>
                  <div>
                     <label htmlFor="liqPrefType" className="flex items-center text-sm font-medium text-secondary">
                       {t.liquidationPreferenceType}
+                       <HelpTooltip text={t.help.liquidationPreferenceType} />
                     </label>
                     <select id="liqPrefType" value={formState.liquidationPreferenceType || ''} onChange={e => handleFormChange('liquidationPreferenceType', e.target.value as LiquidationPreferenceType)} required className={baseInputClasses}>
                         {LIQUIDATION_PREFERENCE_TYPES.map(type => <option key={type} value={type}>{t[snakeToCamel(type) as keyof Translations] as string || type}</option>)}
@@ -131,21 +143,38 @@ function UpdateShareClassForm({ onSubmit, onCancel, transactionToEdit }: UpdateS
                     <div>
                         <label htmlFor="participationCapFactor" className="flex items-center text-sm font-medium text-secondary">
                           {t.participationCapFactor}
+                          <HelpTooltip text={t.help.participationCapFactor} />
                         </label>
-                        <input id="participationCapFactor" type="number" min="1" value={formState.participationCapFactor ?? ''} onChange={e => handleFormChange('participationCapFactor', parseFloat(e.target.value) || 0)} className={`${baseInputClasses} text-right`}/>
+                        <input 
+                          id="participationCapFactor" 
+                          type="number" min="1" 
+                          value={formState.participationCapFactor ?? ''} 
+                          onChange={e => handleFormChange('participationCapFactor', parseFloat(e.target.value) || undefined)} 
+                          className={`${baseInputClasses} text-right`}/>
                     </div>
                 )}
                  <div>
                     <label htmlFor="antiDilution" className="flex items-center text-sm font-medium text-secondary">
                       {t.antiDilutionProtection}
+                       <HelpTooltip text={t.help.antiDilutionProtection} />
                     </label>
                     <select id="antiDilution" value={formState.antiDilutionProtection || ''} onChange={e => handleFormChange('antiDilutionProtection', e.target.value as AntiDilutionProtection)} required className={baseInputClasses}>
                          {ANTI_DILUTION_TYPES.map(type => <option key={type} value={type}>{t[snakeToCamel(type) as keyof Translations] as string || type}</option>)}
                     </select>
                 </div>
                 <div>
-                    <label htmlFor="votesPerShare" className="block text-sm font-medium text-secondary">{t.votesPerShare}</label>
+                    <label htmlFor="votesPerShare" className="flex items-center text-sm font-medium text-secondary">
+                        {t.votesPerShare}
+                         <HelpTooltip text={t.help.votesPerShare} />
+                    </label>
                     <input id="votesPerShare" type="number" min="0" value={formState.votesPerShare ?? ''} onChange={e => handleFormChange('votesPerShare', parseInt(e.target.value, 10) || 0)} required className={`${baseInputClasses} text-right`}/>
+                </div>
+                 <div>
+                    <label htmlFor="protectiveProvisions" className="flex items-center text-sm font-medium text-secondary">
+                      {t.protectiveProvisions}
+                       <HelpTooltip text={t.help.protectiveProvisions} />
+                    </label>
+                    <input id="protectiveProvisions" type="text" value={(formState.protectiveProvisions || []).join(', ')} onChange={handleProvisionsChange} className={baseInputClasses}/>
                 </div>
             </div>
           </div>
@@ -155,7 +184,10 @@ function UpdateShareClassForm({ onSubmit, onCancel, transactionToEdit }: UpdateS
             <legend className="text-lg font-medium text-primary mb-2">{t.statusAndValidity}</legend>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="date" className="block text-sm font-medium text-secondary">{t.date}</label>
+                  <label htmlFor="date" className="flex items-center text-sm font-medium text-secondary">
+                      {t.date}
+                      <HelpTooltip text={t.help.date} />
+                  </label>
                   <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} required className={baseInputClasses}/>
                 </div>
                 <div>
@@ -167,11 +199,17 @@ function UpdateShareClassForm({ onSubmit, onCancel, transactionToEdit }: UpdateS
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="validFrom" className="block text-sm font-medium text-secondary">{t.validFrom}</label>
+                  <label htmlFor="validFrom" className="flex items-center text-sm font-medium text-secondary">
+                      {t.validFrom}
+                      <HelpTooltip text={t.help.validFrom} />
+                  </label>
                   <input type="date" id="validFrom" value={validFrom} onChange={e => setValidFrom(e.target.value)} required className={baseInputClasses}/>
                 </div>
                 <div>
-                  <label htmlFor="validTo" className="block text-sm font-medium text-secondary">{t.validTo} <span className="text-subtle">({t.optional})</span></label>
+                  <label htmlFor="validTo" className="flex items-center text-sm font-medium text-secondary">
+                      {t.validTo} <span className="text-subtle">({t.optional})</span>
+                      <HelpTooltip text={t.help.validTo} />
+                  </label>
                   <input type="date" id="validTo" value={validTo} onChange={e => setValidTo(e.target.value)} className={baseInputClasses}/>
                 </div>
             </div>

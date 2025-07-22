@@ -1,3 +1,5 @@
+
+
 /* In src/styles/index.css */
 
 /* Importiert die Basis-Stile, Komponenten und Utilities von Tailwind CSS */
@@ -55,8 +57,8 @@
 }
 
 .theme-modern {
-    --color-interactive: 71 85 105;      /* slate-500 */
-    --color-interactive-hover: 51 65 85; /* slate-600 */
+    --color-interactive: 51 65 85;      /* slate-700, increased contrast */
+    --color-interactive-hover: 30 41 59; /* slate-800, increased contrast */
     --color-success: 16 185 129;        /* emerald-500 */
     --color-success-hover: 5 150 105;     /* emerald-600 */
 }
@@ -91,10 +93,11 @@
 /* ==========================================================================
    Globale Stile und Schriftgrößen
    ========================================================================== */
-body.font-size-sm { font-size: 0.875rem; }
+body.font-size-xs { font-size: 0.8rem; }
+body.font-size-sm { font-size: 0.9rem; }
 body.font-size-base { font-size: 1rem; }
-body.font-size-lg { font-size: 1.125rem; }
-body.font-size-xl { font-size: 1.25rem; }
+body.font-size-lg { font-size: 1.15rem; }
+body.font-size-xl { font-size: 1.3rem; }
 
 body {
     background-color: rgb(var(--color-bg-background));
@@ -117,20 +120,78 @@ input::placeholder, textarea::placeholder {
    Druck-spezifische Stile
    ========================================================================== */
 @media print {
-  body > *:not(.printable) {
-    visibility: hidden;
-  }
-  .printable, .printable * {
-    visibility: visible;
-  }
-  .printable {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    box-shadow: none;
-    border: none;
-  }
+    /* General print styles */
+    body {
+        background-color: #fff !important;
+        color: #000 !important;
+        font-size: 9pt !important;
+    }
+    
+    main, .grid, .space-y-8, .space-y-6, .space-y-4, .xl\\:grid-cols-2 {
+        display: block !important;
+        gap: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .comparison-view-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 2rem !important;
+    }
+
+    /* Reset card styles for printing */
+    .bg-surface, .p-4, .p-6, .sm\\:p-6, .rounded-lg, .shadow-sm, .border, .border-subtle {
+        background: transparent !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        margin-bottom: 2rem;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        color: #000 !important;
+    }
+    
+    h3.text-lg, h3.text-xl {
+        display: block !important;
+        margin-bottom: 1rem;
+    }
+    
+    /* Ensure tables print fully and correctly */
+    .overflow-x-auto {
+        overflow: visible !important;
+    }
+
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        page-break-inside: auto;
+    }
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+    thead {
+        display: table-header-group !important; /* Repeat header on each page */
+    }
+    tfoot {
+        display: table-footer-group !important;
+    }
+    th, td {
+        border: 1px solid #ccc !important;
+        padding: 4px !important;
+        background-color: transparent !important;
+        color: black !important;
+    }
+    
+    .font-mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+    }
+
+    /* Hide links/urls in print output */
+    a[href]:after {
+        content: none !important;
+    }
 }

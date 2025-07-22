@@ -9,10 +9,10 @@ export const sampleScenarios: SampleScenario[] = [
     data: {
       projectName: 'Web Widgets Inc.',
       stakeholders: [
-        { id: 'founder-1', name: 'Alice' },
-        { id: 'founder-2', name: 'Bob' },
-        { id: 'angel-1', name: 'Charlie' },
-        { id: 'vc-1', name: 'Valley Ventures' }
+        { id: 'founder-a', name: 'Founder A' },
+        { id: 'founder-b', name: 'Founder B' },
+        { id: 'angel-a', name: 'Angel Investor A' },
+        { id: 'vc-a', name: 'VC A' }
       ],
       transactions: [
         {
@@ -28,8 +28,8 @@ export const sampleScenarios: SampleScenario[] = [
             { id: 'sc-common', name: 'Common Stock', liquidationPreferenceRank: 0, liquidationPreferenceFactor: 1, liquidationPreferenceType: 'NON_PARTICIPATING', antiDilutionProtection: 'NONE', votesPerShare: 1, protectiveProvisions: [] }
           ],
           shareholdings: [
-            { id: 'sh-1', stakeholderId: 'founder-1', stakeholderName: 'Alice', shareClassId: 'sc-common', shares: 800000, investment: 8000, vestingScheduleId: 'vs-1' },
-            { id: 'sh-2', stakeholderId: 'founder-2', stakeholderName: 'Bob', shareClassId: 'sc-common', shares: 200000, investment: 2000 }
+            { id: 'sh-1', stakeholderId: 'founder-a', stakeholderName: 'Founder A', shareClassId: 'sc-common', shares: 800000, investment: 8000, vestingScheduleId: 'vs-1' },
+            { id: 'sh-2', stakeholderId: 'founder-b', stakeholderName: 'Founder B', shareClassId: 'sc-common', shares: 200000, investment: 2000 }
           ],
           vestingSchedules: [
             { id: 'vs-1', name: 'Alices 4-Year Vest', grantDate: '2023-01-01', vestingPeriodMonths: 48, cliffMonths: 12, acceleration: undefined }
@@ -41,8 +41,8 @@ export const sampleScenarios: SampleScenario[] = [
           date: '2023-06-01',
           status: TransactionStatus.ACTIVE,
           validFrom: '2023-06-01',
-          investorName: 'Charlie',
-          stakeholderId: 'angel-1',
+          investorName: 'Angel Investor A',
+          stakeholderId: 'angel-a',
           amount: 100000,
           interestRate: 0.08,
           conversionMechanism: ConversionMechanism.CAP_AND_DISCOUNT,
@@ -66,10 +66,10 @@ export const sampleScenarios: SampleScenario[] = [
             liquidationPreferenceType: 'NON_PARTICIPATING',
             antiDilutionProtection: 'BROAD_BASED',
             votesPerShare: 1,
-            protectiveProvisions: []
+            protectiveProvisions: ['Veto on Sale', 'Board Seat']
           },
           newShareholdings: [
-            { id: 'sh-3', stakeholderId: 'vc-1', stakeholderName: 'Valley Ventures', shareClassId: 'sc-seed', shares: 0, investment: 1000000 }
+            { id: 'sh-3', stakeholderId: 'vc-a', stakeholderName: 'VC A', shareClassId: 'sc-seed', shares: 0, investment: 1000000 }
           ],
           convertsLoanIds: ['tx-2']
         }
@@ -84,8 +84,8 @@ export const sampleScenarios: SampleScenario[] = [
         projectName: 'DownRound Dynamics',
         stakeholders: [
             { id: 'founder-a', name: 'Founder A' },
-            { id: 'series-a-vc', name: 'Series A VC' },
-            { id: 'series-b-vc', name: 'Series B VC' }
+            { id: 'vc-a', name: 'VC A' },
+            { id: 'vc-b', name: 'VC B' }
         ],
         transactions: [
              {
@@ -123,7 +123,7 @@ export const sampleScenarios: SampleScenario[] = [
                     protectiveProvisions: []
                 },
                 newShareholdings: [
-                    { id: 'sh-d-2', stakeholderId: 'series-a-vc', stakeholderName: 'Series A VC', shareClassId: 'sc-series-a', shares: 0, investment: 2000000 }
+                    { id: 'sh-d-2', stakeholderId: 'vc-a', stakeholderName: 'VC A', shareClassId: 'sc-series-a', shares: 0, investment: 2000000 }
                 ]
             },
             {
@@ -145,7 +145,7 @@ export const sampleScenarios: SampleScenario[] = [
                     protectiveProvisions: []
                 },
                 newShareholdings: [
-                    { id: 'sh-d-3', stakeholderId: 'series-b-vc', stakeholderName: 'Series B VC', shareClassId: 'sc-series-b', shares: 0, investment: 1000000 }
+                    { id: 'sh-d-3', stakeholderId: 'vc-b', stakeholderName: 'VC B', shareClassId: 'sc-series-b', shares: 0, investment: 1000000 }
                 ]
             }
         ]
@@ -158,10 +158,10 @@ export const sampleScenarios: SampleScenario[] = [
     data: {
         projectName: 'Complex Exit Co',
         stakeholders: [
-            { id: 'founder-c', name: 'Founder C' },
-            { id: 'pref-investor', name: 'Pref Investor' },
-            { id: 'bank-lender', name: 'Big Bank' },
-            { id: 'sub-lender', name: 'Subordinated Lender' },
+            { id: 'founder-a', name: 'Founder A' },
+            { id: 'vc-a', name: 'VC A' },
+            { id: 'bank-a', name: 'Bank A' },
+            { id: 'lender-a', name: 'Subordinated Lender A' },
         ],
         transactions: [
              {
@@ -177,7 +177,7 @@ export const sampleScenarios: SampleScenario[] = [
                     { id: 'sc-w-common', name: 'Common Stock', liquidationPreferenceRank: 0, liquidationPreferenceFactor: 1, liquidationPreferenceType: 'NON_PARTICIPATING', antiDilutionProtection: 'NONE', votesPerShare: 1, protectiveProvisions: [] }
                 ],
                 shareholdings: [
-                    { id: 'sh-w-1', stakeholderId: 'founder-c', stakeholderName: 'Founder C', shareClassId: 'sc-w-common', shares: 1000000, investment: 10000 }
+                    { id: 'sh-w-1', stakeholderId: 'founder-a', stakeholderName: 'Founder A', shareClassId: 'sc-w-common', shares: 1000000, investment: 10000 }
                 ],
             },
             {
@@ -200,7 +200,7 @@ export const sampleScenarios: SampleScenario[] = [
                     protectiveProvisions: []
                 },
                 newShareholdings: [
-                    { id: 'sh-w-2', stakeholderId: 'pref-investor', stakeholderName: 'Pref Investor', shareClassId: 'sc-w-pref', shares: 0, investment: 1000000 }
+                    { id: 'sh-w-2', stakeholderId: 'vc-a', stakeholderName: 'VC A', shareClassId: 'sc-w-pref', shares: 0, investment: 1000000 }
                 ]
             },
             {
@@ -209,7 +209,7 @@ export const sampleScenarios: SampleScenario[] = [
                 date: '2023-06-01',
                 status: TransactionStatus.ACTIVE,
                 validFrom: '2023-06-01',
-                lenderName: 'Big Bank',
+                lenderName: 'Bank A',
                 amount: 500000,
                 interestRate: 0.06,
                 seniority: 'SENIOR_SECURED'
@@ -220,7 +220,7 @@ export const sampleScenarios: SampleScenario[] = [
                 date: '2023-09-01',
                 status: TransactionStatus.ACTIVE,
                 validFrom: '2023-09-01',
-                lenderName: 'Subordinated Lender',
+                lenderName: 'Subordinated Lender A',
                 amount: 250000,
                 interestRate: 0.12,
                 seniority: 'SUBORDINATED'
@@ -235,9 +235,9 @@ export const sampleScenarios: SampleScenario[] = [
     data: {
         projectName: 'Control Corp',
         stakeholders: [
-            { id: 'founder-d', name: 'Founder D' },
-            { id: 'founder-e', name: 'Founder E' },
-            { id: 'new-investor-f', name: 'Investor F' }
+            { id: 'founder-a', name: 'Founder A' },
+            { id: 'founder-b', name: 'Founder B' },
+            { id: 'angel-a', name: 'Angel Investor A' }
         ],
         transactions: [
              {
@@ -253,8 +253,8 @@ export const sampleScenarios: SampleScenario[] = [
                     { id: 'sc-g-common', name: 'Common', liquidationPreferenceRank: 0, liquidationPreferenceFactor: 1, liquidationPreferenceType: 'NON_PARTICIPATING', antiDilutionProtection: 'NONE', votesPerShare: 1, protectiveProvisions: [] }
                 ],
                 shareholdings: [
-                    { id: 'sh-g-1', stakeholderId: 'founder-d', stakeholderName: 'Founder D', shareClassId: 'sc-g-common', shares: 500000, investment: 5000 },
-                    { id: 'sh-g-2', stakeholderId: 'founder-e', stakeholderName: 'Founder E', shareClassId: 'sc-g-common', shares: 500000, investment: 5000 }
+                    { id: 'sh-g-1', stakeholderId: 'founder-a', stakeholderName: 'Founder A', shareClassId: 'sc-g-common', shares: 500000, investment: 5000 },
+                    { id: 'sh-g-2', stakeholderId: 'founder-b', stakeholderName: 'Founder B', shareClassId: 'sc-g-common', shares: 500000, investment: 5000 }
                 ]
             },
             {
@@ -274,12 +274,56 @@ export const sampleScenarios: SampleScenario[] = [
                 date: '2024-01-01',
                 status: TransactionStatus.ACTIVE,
                 validFrom: '2024-01-01',
-                sellerStakeholderId: 'founder-e',
-                buyerStakeholderId: 'new-investor-f',
-                buyerStakeholderName: 'Investor F',
+                sellerStakeholderId: 'founder-b',
+                buyerStakeholderId: 'angel-a',
+                buyerStakeholderName: 'Angel Investor A',
                 shareClassId: 'sc-g-common',
                 numberOfShares: 100000,
                 pricePerShare: 5
+            }
+        ]
+    }
+  },
+  {
+    id: 'equalization-scenario',
+    titleKey: 'scenarioEqualizationTitle',
+    descriptionKey: 'scenarioEqualizationDescription',
+    data: {
+        projectName: 'Equalization Example',
+        stakeholders: [
+            { id: 'founder-a', name: 'Founder A' },
+            { id: 'late-investor-a', name: 'Late Investor A' },
+        ],
+        transactions: [
+             {
+                id: 'tx-e-1',
+                type: TransactionType.FOUNDING,
+                date: '2023-01-01',
+                status: TransactionStatus.ACTIVE,
+                validFrom: '2023-01-01',
+                companyName: 'Equalization Example',
+                legalForm: 'GmbH',
+                currency: 'EUR',
+                shareClasses: [
+                    { id: 'sc-e-common', name: 'Common Stock', liquidationPreferenceRank: 0, liquidationPreferenceFactor: 1, liquidationPreferenceType: 'NON_PARTICIPATING', antiDilutionProtection: 'NONE', votesPerShare: 1, protectiveProvisions: [] }
+                ],
+                shareholdings: [
+                    { id: 'sh-e-1', stakeholderId: 'founder-a', stakeholderName: 'Founder A', shareClassId: 'sc-e-common', shares: 100000, investment: 10000, originalPricePerShare: 0.1 }
+                ]
+            },
+            {
+                id: 'tx-e-2',
+                type: TransactionType.EQUALIZATION_PURCHASE,
+                date: '2023-07-01',
+                status: TransactionStatus.ACTIVE,
+                validFrom: '2023-07-01',
+                newStakeholderId: 'late-investor-a',
+                newStakeholderName: 'Late Investor A',
+                purchasedShares: 50000,
+                shareClassId: 'sc-e-common',
+                pricePerShare: 0.1,
+                equalizationInterestRate: 0.10,
+                referenceTransactionId: 'tx-e-1'
             }
         ]
     }

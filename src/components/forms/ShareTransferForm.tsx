@@ -1,6 +1,5 @@
 
 
-
 import React, { useState, useMemo, useEffect } from 'react';
 import type { ShareTransferTransaction, CapTable } from '../../types';
 import { TransactionType, TransactionStatus } from '../../types';
@@ -111,7 +110,10 @@ function ShareTransferForm({ onSubmit, onCancel, transactionToEdit, capTable }: 
         <div className="space-y-4 p-4 bg-background-subtle rounded-lg border">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div>
-                    <label htmlFor="date" className="block text-sm font-medium text-secondary">{t.date}</label>
+                    <label htmlFor="date" className="flex items-center text-sm font-medium text-secondary">
+                        {t.date}
+                        <HelpTooltip text={t.help.date} />
+                    </label>
                     <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} required className={baseInputClasses}/>
                 </div>
                 <div>
@@ -151,7 +153,10 @@ function ShareTransferForm({ onSubmit, onCancel, transactionToEdit, capTable }: 
             </div>
 
             <div className="pt-4 border-t border-strong">
-                <p className="text-base font-medium text-primary mb-2">{t.additionalPayment} ({t.optional})</p>
+                <p className="text-base font-medium text-primary mb-2 flex items-center gap-2">
+                    {t.additionalPayment} ({t.optional})
+                    <HelpTooltip text={t.help.additionalPayment} />
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label htmlFor="additionalPaymentAmount" className="block text-sm font-medium text-secondary">{t.investmentAmount}</label>
@@ -179,11 +184,17 @@ function ShareTransferForm({ onSubmit, onCancel, transactionToEdit, capTable }: 
               </select>
             </div>
             <div>
-              <label htmlFor="validFrom" className="block text-sm font-medium text-secondary">{t.validFrom}</label>
+              <label htmlFor="validFrom" className="flex items-center text-sm font-medium text-secondary">
+                  {t.validFrom}
+                  <HelpTooltip text={t.help.validFrom} />
+              </label>
               <input type="date" id="validFrom" value={validFrom} onChange={e => setValidFrom(e.target.value)} required className={baseInputClasses}/>
             </div>
             <div>
-              <label htmlFor="validTo" className="block text-sm font-medium text-secondary">{t.validTo} <span className="text-subtle">({t.optional})</span></label>
+              <label htmlFor="validTo" className="flex items-center text-sm font-medium text-secondary">
+                  {t.validTo} <span className="text-subtle">({t.optional})</span>
+                  <HelpTooltip text={t.help.validTo} />
+              </label>
               <input type="date" id="validTo" value={validTo} onChange={e => setValidTo(e.target.value)} className={baseInputClasses}/>
             </div>
         </div>

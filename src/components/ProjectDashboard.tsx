@@ -22,13 +22,17 @@ interface ProjectDashboardProps {
   onRenameProject: (id: string, newName: string) => void;
   onDeleteProject: (id: string) => void;
   onLoadScenario: (scenarioData: SampleScenario['data']) => void;
+  onStartComparison: (projectIds: [string, string]) => void;
 }
 
-function ProjectDashboard({ projects, onCreateProject, onSelectProject, onRenameProject, onDeleteProject, onLoadScenario }: ProjectDashboardProps) {
+function ProjectDashboard({ projects, onCreateProject, onSelectProject, onRenameProject, onDeleteProject, onLoadScenario, onStartComparison }: ProjectDashboardProps) {
   const { t: translations } = useLocalization();
   const [newProjectName, setNewProjectName] = useState('');
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renamingName, setRenamingName] = useState('');
+  
+  const [isComparisonMode, setIsComparisonMode] = useState(false);
+  const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +69,24 @@ function ProjectDashboard({ projects, onCreateProject, onSelectProject, onRename
         }
       }
   };
+  
+  const toggleComparisonSelection = (projectId: string) => {
+      setSelectedForComparison(prev => {
+          if(prev.includes(projectId)) {
+              return prev.filter(id => id !== projectId);
+          }
+          if(prev.length < 2) {
+              return [...prev, projectId];
+          }
+          return prev; // Max 2 selections
+      });
+  }
+
+  const handleStartComparisonClick = () => {
+      if(selectedForComparison.length === 2) {
+          onStartComparison(selectedForComparison as [string, string]);
+      }
+  }
 
 
   return (
@@ -121,49 +143,91 @@ function ProjectDashboard({ projects, onCreateProject, onSelectProject, onRename
             />
         </div>
 
-      <div className="space-y-4">
-        {projects.length > 0 && (
-          projects.map((project) => (
-            <div key={project.id} className="bg-surface p-4 rounded-lg shadow-sm border border-subtle flex items-center justify-between gap-4">
-              {renamingId === project.id ? (
-                <form onSubmit={handleRenameSubmit} className="flex-grow flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={renamingName}
-                    onChange={(e) => setRenamingName(e.target.value)}
-                    className="flex-grow px-3 py-1 bg-surface border border-interactive rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-interactive"
-                    autoFocus
-                  />
-                  <button type="submit" className="px-3 py-1 text-sm bg-success text-on-interactive rounded-md hover:bg-success-hover">{translations.save}</button>
-                  <button type="button" onClick={handleCancelRename} className="px-3 py-1 text-sm bg-background-subtle rounded-md hover:bg-background">{translations.cancel}</button>
-                </form>
-              ) : (
-                <>
-                  <button onClick={() => onSelectProject(project.id)} className="flex-grow text-left">
-                    <span className="font-semibold text-primary text-lg hover:text-interactive">{project.name}</span>
-                  </button>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button 
-                        onClick={() => handleRenameClick(project)} 
-                        className="p-2 text-secondary hover:text-interactive hover:bg-background-subtle rounded-md"
-                        title={translations.renameProject}
+      <section className="mt-12">
+        <div className="flex justify-between items-center mb-6">
+            <h3 className="text-2xl font-bold text-primary">{translations.myProjectsTitle}</h3>
+            <div className="flex items-center gap-4">
+                {isComparisonMode && (
+                     <button
+                        onClick={handleStartComparisonClick}
+                        className="px-4 py-2 text-sm font-medium text-on-interactive bg-success rounded-md shadow-sm hover:bg-success-hover disabled:bg-disabled"
+                        disabled={selectedForComparison.length !== 2}
                     >
-                      <PencilIcon className="w-5 h-5" />
+                        {translations.startComparison} ({selectedForComparison.length}/2)
                     </button>
-                    <button 
-                        onClick={() => onDeleteProject(project.id)} 
-                        className="p-2 text-secondary hover:text-danger hover:bg-background-subtle rounded-md"
-                        title={translations.delete}
-                    >
-                      <TrashIcon className="w-5 h-5" />
-                    </button>
-                  </div>
-                </>
-              )}
+                )}
+                <button
+                    onClick={() => { 
+                        setIsComparisonMode(!isComparisonMode);
+                        setSelectedForComparison([]);
+                    }}
+                    className={`px-4 py-2 text-sm font-medium rounded-md shadow-sm transition-colors ${isComparisonMode ? 'bg-background text-primary' : 'bg-interactive text-on-interactive hover:bg-interactive-hover'}`}
+                >
+                    {isComparisonMode ? translations.cancel : translations.compareProjects}
+                </button>
             </div>
-          ))
-        )}
-      </div>
+        </div>
+
+        <div className="space-y-4">
+          {projects.length > 0 ? (
+            projects.map((project) => (
+              <div key={project.id} className="bg-surface p-4 rounded-lg shadow-sm border border-subtle flex items-center justify-between gap-4">
+                {renamingId === project.id ? (
+                  <form onSubmit={handleRenameSubmit} className="flex-grow flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={renamingName}
+                      onChange={(e) => setRenamingName(e.target.value)}
+                      className="flex-grow px-3 py-1 bg-surface border border-interactive rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-interactive"
+                      autoFocus
+                    />
+                    <button type="submit" className="px-3 py-1 text-sm bg-success text-on-interactive rounded-md hover:bg-success-hover">{translations.save}</button>
+                    <button type="button" onClick={handleCancelRename} className="px-3 py-1 text-sm bg-background-subtle rounded-md hover:bg-background">{translations.cancel}</button>
+                  </form>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-4 flex-grow">
+                        {isComparisonMode && (
+                             <input
+                                type="checkbox"
+                                checked={selectedForComparison.includes(project.id)}
+                                onChange={() => toggleComparisonSelection(project.id)}
+                                className="h-5 w-5 rounded border-strong text-interactive focus:ring-interactive cursor-pointer accent-interactive"
+                                aria-label={`Select ${project.name} for comparison`}
+                             />
+                        )}
+                        <button onClick={() => onSelectProject(project.id)} className="flex-grow text-left">
+                          <span className="font-semibold text-primary text-lg hover:text-interactive">{project.name}</span>
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button 
+                          onClick={() => handleRenameClick(project)} 
+                          className="p-2 text-secondary hover:text-interactive hover:bg-background-subtle rounded-md"
+                          title={translations.renameProject}
+                      >
+                        <PencilIcon className="w-5 h-5" />
+                      </button>
+                      <button 
+                          onClick={() => onDeleteProject(project.id)} 
+                          className="p-2 text-secondary hover:text-danger hover:bg-background-subtle rounded-md"
+                          title={translations.delete}
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-10 px-4 bg-surface rounded-lg shadow-sm border border-subtle">
+              <p className="text-secondary">{translations.noProjects}</p>
+            </div>
+          )}
+        </div>
+      </section>
     </main>
   );
 }
