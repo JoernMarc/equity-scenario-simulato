@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import type { Transaction, Stakeholder, Project, ParsedImportData, ShareClass, Shareholding, VestingSchedule, FoundingTransaction, FinancingRoundTransaction, UpdateShareClassTransaction, ShareTransferTransaction, EqualizationPurchaseTransaction, ConvertibleLoanTransaction, DebtInstrumentTransaction } from '../types';
+import type { Transaction, Stakeholder, Project, ParsedImportData, ShareClass, Shareholding, VestingSchedule, FoundingTransaction, FinancingRoundTransaction, UpdateShareClassTransaction } from '../types';
 import { TransactionType } from '../types';
 
 export const exportToExcel = (project: Project): void => {

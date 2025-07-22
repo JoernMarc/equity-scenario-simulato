@@ -1,7 +1,7 @@
 
 
-import React, { useState, useMemo, useEffect } from 'react';
-import type { Project, CapTable, WaterfallResult, VotingResult, TotalCapitalizationResult, CashflowResult, ProjectAssessmentResult, StakeholderPayoutSummaryResult } from '../types';
+import { useState, useMemo, useEffect } from 'react';
+import type { Project } from '../types';
 import { calculateCapTable, simulateWaterfall, simulateVote, calculateTotalCapitalization, calculateCashflow, assessProject, summarizeWaterfallByStakeholder } from '../logic/calculations';
 import { useLocalization } from '../contexts/LocalizationContext';
 import HelpTooltip from './HelpTooltip';

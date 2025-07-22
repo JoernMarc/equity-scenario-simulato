@@ -1,7 +1,7 @@
 
 
 import React, { createContext, useMemo, useContext } from 'react';
-import type { Project, ShareClass, Stakeholder, Transaction, FoundingTransaction } from '../types';
+import type { Project, ShareClass, Stakeholder, Transaction } from '../types';
 import { getShareClassesAsOf } from '../logic/calculations';
 
 interface ProjectContextType {
